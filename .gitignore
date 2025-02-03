@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+build/
+ignore_dir/
+win32/
