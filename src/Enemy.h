@@ -20,6 +20,8 @@ public:
 	virtual void updateEnemy(const sf::Vector2f& direction) = 0;
   virtual void enemyShoot() = 0;
   virtual const sf::Sprite& getSprite() = 0;
+  virtual void die() = 0;
+  virtual unsigned int& getHp() = 0;
   virtual ~Enemy();
 };
 
@@ -28,13 +30,13 @@ private:
   sf::Texture EnemyTexture;
 	sf::Sprite EnemySprite;
 	const float FallingSpeed = 0.02f;
-	unsigned int hp = 10;
 	sf::Clock ShootTimer;
   std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> ProjVec; 
   enum EnemyState {
     moving_up,
     moving_down
   };
+	unsigned int hp = 10;
 
 public:
   MoonStone(sf::Vector2f SpawnPos, 
@@ -42,6 +44,8 @@ public:
 	void updateEnemy(const sf::Vector2f& direction) override;
   void enemyShoot() override;
   const sf::Sprite& getSprite() override;
+  unsigned int& getHp() override;
+  void die() override;
 };
 
 #endif

@@ -11,6 +11,9 @@ Bullet::Bullet(sf::Vector2f ShootPos) {
 }
 
 void Bullet::update() {
+  // if (ProjShape.getGlobalBounds().contains(/* anything */))
+  //   enemy->getHp() - 1;
+
   if (!flewAway)
 	  ProjShape.move(0, Speed);
 
@@ -27,7 +30,7 @@ const sf::CircleShape& Bullet::getShape() {
   return ProjShape;
 }
 
-sf::Rect<float> Bullet::getProjBounds() {
+const sf::Rect<float> Bullet::getProjBounds() {
   return ProjShape.getGlobalBounds();
 }
 
@@ -50,7 +53,7 @@ bool Pebble::isFlewAway() {
   return flewAway;
 }
 
-sf::Rect<float> Pebble::getProjBounds() {
+const sf::Rect<float> Pebble::getProjBounds() {
   return ProjShape.getGlobalBounds();
 }
 

@@ -24,7 +24,7 @@ private:
 public:
   Projectile() = default;
 	virtual void update() = 0;
-  virtual sf::Rect<float> getProjBounds() = 0;
+  virtual const sf::Rect<float> getProjBounds() = 0;
   virtual const sf::CircleShape& getShape() = 0;
   virtual bool isFlewAway() = 0;
 };
@@ -39,7 +39,7 @@ private:
 public: 	
 	Bullet(sf::Vector2f ShootPos);
   bool isFlewAway() override;
-  sf::Rect<float> getProjBounds() override;
+  const sf::Rect<float> getProjBounds() override;
 	void update() override;	
   const sf::CircleShape& getShape() override;
 }; 
@@ -53,7 +53,7 @@ class Pebble : public Projectile {
 	public: 
 		Pebble(sf::Vector2f ShootPos);
     bool isFlewAway() override;
-    sf::Rect<float> getProjBounds() override;
+    const sf::Rect<float> getProjBounds() override;
     const sf::CircleShape& getShape() override;
 		void update() override;
 };

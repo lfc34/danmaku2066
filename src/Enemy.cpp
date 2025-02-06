@@ -19,6 +19,8 @@ MoonStone::MoonStone(sf::Vector2f SpawnPos,
 }
 
 void MoonStone::updateEnemy(const sf::Vector2f& direction) {
+  if (this->hp == 0)
+    die();
   EnemySprite.rotate(10);
   // TODO: implement correct logic (see enemy_move_logic diagram)
   sf::Vector2f current_direction = direction;
@@ -29,6 +31,14 @@ void MoonStone::updateEnemy(const sf::Vector2f& direction) {
 
 const sf::Sprite& MoonStone::getSprite() {
   return EnemySprite;
+}
+
+unsigned int& MoonStone::getHp() {
+  return this->hp;
+}
+
+void MoonStone::die() {
+  EnemySprite.setColor(sf::Color::Transparent);
 }
 
 void MoonStone::enemyShoot() {

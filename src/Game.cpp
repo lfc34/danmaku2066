@@ -60,9 +60,10 @@ void Game::lvl1Loop() {
   unsigned int currentWave {0};
 
   // Number of enemies for every wave
-  std::vector<unsigned int> enemyCntWave = {10};
+  std::vector<unsigned int> enemyCntWave = {10, 10};
 
   // Wrong. TODO: replace as a struct
+  // Try to implement 3-point system
   std::vector<sf::Vector2f> directions;
   directions.push_back(sf::Vector2f(200,200));
 
@@ -85,6 +86,9 @@ void Game::lvl1Loop() {
 
     lvl1.drawLevel(window); // must be first in draw order
 
+    /* collision logic
+      if enemy rectangle intersects any kind
+      of bullet object rectangle, they hp goes down */
     // ENEMY WAVES PART //
     if (enemyCntWave.at(currentWave) > 0 
        && waveTimer.getElapsedTime().asSeconds() > 0.2) {
