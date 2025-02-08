@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Enemy.h"
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -64,8 +65,12 @@ void Game::lvl1Loop() {
 
   // Wrong. TODO: replace as a struct
   // Try to implement 3-point system
-  std::vector<sf::Vector2f> directions;
-  directions.push_back(sf::Vector2f(200,200));
+  std::vector<EnemyPathWay> directions;
+  EnemyPathWay wave1 = {
+    sf::Vector2f (200, 200),
+    sf::Vector2f (400, -200)
+  };
+  directions.push_back(wave1);
 
   //=========================WAVE SPECIFIC DATA==============================//
 
@@ -94,13 +99,15 @@ void Game::lvl1Loop() {
        && waveTimer.getElapsedTime().asSeconds() > 0.2) {
 
       EnemiesVec.emplace_back(std::make_unique<MoonStone>
-      (sf::Vector2f(0,0), ProjVec));
+      (sf::Vector2f(0,0), ProjVec, 
+              directions.at(currentWave)));
 
       --enemyCntWave.at(currentWave);
       waveTimer.restart();
     }
+
     for (auto& i : EnemiesVec) {
-      i->updateEnemy(directions.at(currentWave));
+      i->updateEnemy();
       window.draw(i->getSprite());
     }
     // ENEMY WAVES PART //

@@ -15,9 +15,15 @@
 
 #include "Projectile.h"
 
+// TODO: add more point for more curve line
+struct EnemyPathWay {
+  sf::Vector2f mid_point;
+  sf::Vector2f end_point;
+};
+
 class Enemy {
 public: 
-	virtual void updateEnemy(const sf::Vector2f& direction) = 0;
+	virtual void updateEnemy() = 0;
   virtual void enemyShoot() = 0;
   virtual const sf::Sprite& getSprite() = 0;
   virtual void die() = 0;
@@ -32,16 +38,16 @@ private:
 	const float FallingSpeed = 0.02f;
 	sf::Clock ShootTimer;
   std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> ProjVec; 
-  enum EnemyState {
-    moving_up,
-    moving_down
-  };
 	unsigned int hp = 10;
+  // This two variables above represent the state of enemy movement
+  EnemyPathWay path;
+  sf::Vector2f current_direction;
 
 public:
   MoonStone(sf::Vector2f SpawnPos, 
-            std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> Pvec);
-	void updateEnemy(const sf::Vector2f& direction) override;
+            std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> Pvec,
+            EnemyPathWay p);
+	void updateEnemy() override;
   void enemyShoot() override;
   const sf::Sprite& getSprite() override;
   unsigned int& getHp() override;

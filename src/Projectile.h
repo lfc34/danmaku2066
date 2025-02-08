@@ -14,7 +14,6 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-// the inherance in this file is called "Hierarchical inheritance"
 class Projectile {
 private:
 	float Speed; 
@@ -23,7 +22,7 @@ private:
 	
 public:
   Projectile() = default;
-	virtual void update() = 0;
+  virtual void update() = 0;
   virtual const sf::Rect<float> getProjBounds() = 0;
   virtual const sf::CircleShape& getShape() = 0;
   virtual bool isFlewAway() = 0;

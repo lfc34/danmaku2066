@@ -6,7 +6,8 @@ Enemy::~Enemy() {
 
 MoonStone::MoonStone(sf::Vector2f SpawnPos,
                      std::shared_ptr<std::vector<
-                     std::unique_ptr<Projectile>>> Pvec) {
+                     std::unique_ptr<Projectile>>> Pvec,
+                     EnemyPathWay p) {
   ProjVec = Pvec;
 	if(!(EnemyTexture.loadFromFile("../assets/gfx/rock.png"))) {
     std::cerr << "Failed to load enemy texture. Exiting...\n";
@@ -15,17 +16,22 @@ MoonStone::MoonStone(sf::Vector2f SpawnPos,
   EnemySprite.setTexture(EnemyTexture);
 	EnemySprite.setPosition(SpawnPos);
 	EnemySprite.setOrigin(30, 30);
+  path = p;
+  current_direction = path.mid_point;
   std::clog << "Enemy spawned\n";
 }
 
-void MoonStone::updateEnemy(const sf::Vector2f& direction) {
+void MoonStone::updateEnemy() {
+  // checks for enemy<->bullet collision
+  for (const auto& i : *ProjVec) {
+    if (EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+      this->hp--;
+  }
   if (this->hp == 0)
     die();
   EnemySprite.rotate(10);
-  // TODO: implement correct logic (see enemy_move_logic diagram)
-  sf::Vector2f current_direction = direction;
-  if (EnemySprite.getPosition().y >= 300)
-    current_direction.y = (0 - current_direction.y) - current_direction.y; 
+  if (EnemySprite.getPosition() == path.mid_point)
+    current_direction = path.end_point;
   EnemySprite.move(FallingSpeed * current_direction);
 }
 
