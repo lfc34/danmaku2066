@@ -25,6 +25,7 @@ class Enemy {
 public: 
 	virtual void updateEnemy() = 0;
   virtual void enemyShoot() = 0;
+  virtual sf::Rect<float> getBounds() = 0;
   virtual const sf::Sprite& getSprite() = 0;
   virtual void die() = 0;
   virtual unsigned int& getHp() = 0;
@@ -37,8 +38,10 @@ private:
 	sf::Sprite EnemySprite;
 	const float FallingSpeed = 0.02f;
 	sf::Clock ShootTimer;
-  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> ProjVec; 
+  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> player_pr_vec; 
+  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_pr_vec;
 	unsigned int hp = 10;
+
   // This two variables above represent the state of enemy movement
   EnemyPathWay path;
   sf::Vector2f current_direction;
@@ -46,9 +49,11 @@ private:
 public:
   MoonStone(sf::Vector2f SpawnPos, 
             std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> Pvec,
+            std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> OwnVec,
             EnemyPathWay p);
 	void updateEnemy() override;
   void enemyShoot() override;
+  sf::Rect<float> getBounds() override;
   const sf::Sprite& getSprite() override;
   unsigned int& getHp() override;
   void die() override;
