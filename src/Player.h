@@ -31,12 +31,16 @@ private:
   // to one function to pass it to another func etc
   std::shared_ptr<SoundManager> SndMgr;
   std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> ProjVec;
+  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_prj_vec;
+  std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies_vec;
 
 public:
   void loadPlayerModel();
   void placeStartPos();
   Player(std::shared_ptr<SoundManager> smg,
-         std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv);
+         std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv,
+         std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enm_vec,
+         std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> en_proj_vec);
 
   sf::Clock PlayerShootTimer; 
 
@@ -47,6 +51,7 @@ public:
   void move(float x, float y); 
   void fire();
   void kbInputHandler(sf::Keyboard& kb); 
+  void player_die();
 
   void updatePlayer(sf::RenderWindow& w);
 };

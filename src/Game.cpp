@@ -33,15 +33,20 @@ void Game::lvl1Loop() {
   std::shared_ptr SndMgr = std::make_shared<SoundManager>();
 
   // Projectile vector made shared for other classes that need it
-  // Enemies vector, however, doesn't need to be shared (yet)
   std::shared_ptr ProjVec = 
   std::make_shared<std::vector
   <std::unique_ptr<Projectile>>>();
 
-  std::vector<std::unique_ptr<Enemy>> EnemiesVec {};
+  std::shared_ptr enemy_proj_vec =
+  std::make_shared<std::vector<std::unique_ptr<Projectile>>>();
 
-  std::unique_ptr player = std::make_unique<Player>(SndMgr, ProjVec);
+  std::shared_ptr enemy_vec = std::make_shared<std::vector<std::unique_ptr<Enemy>>>();
 
+  // player
+  std::unique_ptr player = std::make_unique<Player>(SndMgr, ProjVec,
+                           enemy_vec, enemy_proj_vec);
+
+  // timers
   sf::Clock waveTimer;
   sf::Clock BossTimer;
 
@@ -98,15 +103,15 @@ void Game::lvl1Loop() {
     if (enemyCntWave.at(currentWave) > 0 
        && waveTimer.getElapsedTime().asSeconds() > 0.2) {
 
-      EnemiesVec.emplace_back(std::make_unique<MoonStone>
-      (sf::Vector2f(0,0), ProjVec, 
+      enemy_vec->emplace_back(std::make_unique<MoonStone>
+              (sf::Vector2f(0,0), ProjVec, enemy_proj_vec,
               directions.at(currentWave)));
 
       --enemyCntWave.at(currentWave);
       waveTimer.restart();
     }
 
-    for (auto& i : EnemiesVec) {
+    for (auto& i : *enemy_vec) {
       i->updateEnemy();
       window.draw(i->getSprite());
     }
@@ -123,6 +128,23 @@ void Game::lvl1Loop() {
         i->update();
         window.draw(i->getShape());
       }
+    }
+    
+    // TODO: VERY buggy, because enemy projectiles that are flew away
+    // delete ones who are not. 
+    // Possible solution: after projectile flew away make them transparent (xd)
+    // this will not unload them from memory completely (like player bullets do)
+    // but at least will save some video mem
+    for (auto& i : *enemy_proj_vec) {
+      // if (i->isFlewAway() && !(enemy_proj_vec->empty())) {
+      //   enemy_proj_vec->erase(enemy_proj_vec->begin());
+      //   enemy_proj_vec->shrink_to_fit();
+      //   break; // it's just works
+      // }
+      // else {
+      i->update();
+      window.draw(i->getShape());
+      // }
     }
      
     // TODO: change order for readability

@@ -46,7 +46,8 @@ Pebble::Pebble(sf::Vector2f ShootPos) {
 void Pebble::update() {
   if (!flewAway)
     ProjShape.move(0, Speed);
-  // check out of screen here
+  if (ProjShape.getPosition().y > 1200)
+    flewAway = true;
 }
 
 bool Pebble::isFlewAway() {

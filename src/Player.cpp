@@ -16,9 +16,13 @@ void Player::placeStartPos() {
 }
 
 Player::Player(std::shared_ptr<SoundManager> smg,             
-               std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv) {
+               std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv,
+               std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies,
+               std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> en) {
   SndMgr = smg;
   ProjVec = pv;
+  enemy_prj_vec = en;
+  enemies_vec = enemies;
   loadPlayerModel();
   PlayerSprite.setOrigin(25, 0);
   placeStartPos();
@@ -34,7 +38,16 @@ sf::Vector2f Player::getPlayerPosition() {
 
 void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
-  // check collision with enemies here
+
+  for (const auto& enemy : *enemies_vec) {
+    if (enemy->getBounds().intersects(getPlayerBounds()))
+      player_die();
+  }
+
+  for (const auto& pebble : *enemy_prj_vec) {
+    if (pebble->getProjBounds().intersects(getPlayerBounds()))
+      player_die();
+  }
 }
 
 bool Player::isMovingOutOfBnds() {
@@ -89,4 +102,10 @@ void Player::kbInputHandler(sf::Keyboard& kb) {
 
   //after movement vector[x, y] is calculated, finally move player
   move(MoveX, MoveY);
+}
+
+void Player::player_die() {
+  // soon there will be more complex logic
+  // paint it red just for test
+  PlayerSprite.setColor(sf::Color::Red);
 }
