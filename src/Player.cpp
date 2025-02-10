@@ -36,17 +36,39 @@ sf::Vector2f Player::getPlayerPosition() {
   return PlayerSprite.getPosition();
 }
 
+void Player::game_over() {
+  // let it be this way (at least for now)
+  std::cout << "Game over!";
+  exit(1);
+}
+
 void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
 
   for (const auto& enemy : *enemies_vec) {
-    if (enemy->getBounds().intersects(getPlayerBounds()))
-      player_die();
+    if (enemy->getBounds().intersects(getPlayerBounds())
+        && !is_invuln) {
+      if (this->lives > 0) {
+        this->lives--;
+        player_die();
+      }
+      else {  
+        game_over();
+      }
+        }
   }
 
   for (const auto& pebble : *enemy_prj_vec) {
-    if (pebble->getProjBounds().intersects(getPlayerBounds()))
-      player_die();
+    if (pebble->getProjBounds().intersects(getPlayerBounds())
+        && !is_invuln) {
+      if (this->lives > 0) {
+        this->lives--;
+        player_die();
+      }
+      else {
+       game_over();
+      }
+        }
   }
 }
 
@@ -105,7 +127,12 @@ void Player::kbInputHandler(sf::Keyboard& kb) {
 }
 
 void Player::player_die() {
-  // soon there will be more complex logic
-  // paint it red just for test
+  is_invuln = true;
+  invuln_clock.restart();
+  placeStartPos();
   PlayerSprite.setColor(sf::Color::Red);
+  if (invuln_clock.getElapsedTime().asMilliseconds() > 1500) {
+    PlayerSprite.setColor(sf::Color::White);
+    is_invuln = false;
+  }
 }

@@ -22,10 +22,12 @@ private:
   sf::Sprite PlayerSprite;
   const float PlayerSpeed = 5.0f;
   const float DiagSlowdown = 1.414213f; 
-  const float StartPosX = 350;
+  const float StartPosX = 400;
   const float StartPosY = 500;
 
-  int lives = 3;
+  unsigned int lives = 3;
+  bool is_invuln = false;
+  sf::Clock invuln_clock;
   
   // this made to avoid matryoshka when you pass address
   // to one function to pass it to another func etc
@@ -35,6 +37,7 @@ private:
   std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies_vec;
 
 public:
+  void game_over();
   void loadPlayerModel();
   void placeStartPos();
   Player(std::shared_ptr<SoundManager> smg,
