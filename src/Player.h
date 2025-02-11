@@ -10,6 +10,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 #include "Projectile.h"
 #include "Enemy.h"
@@ -21,6 +22,7 @@ private:
   sf::Texture PlayerTexture;
   sf::Sprite PlayerSprite;
   const float PlayerSpeed = 5.0f;
+  // precisely calculated lmao
   const float DiagSlowdown = 1.414213f; 
   const float StartPosX = 400;
   const float StartPosY = 500;
@@ -55,6 +57,7 @@ public:
   void fire();
   void kbInputHandler(sf::Keyboard& kb); 
   void player_die();
+  bool check_collision();
 
   void updatePlayer(sf::RenderWindow& w);
 };

@@ -13,6 +13,7 @@ void Player::loadPlayerModel() {
 
 void Player::placeStartPos() {
   PlayerSprite.setPosition(StartPosX, StartPosY);
+  std::clog << "Placed player at start position\n";
 }
 
 Player::Player(std::shared_ptr<SoundManager> smg,             
@@ -37,39 +38,40 @@ sf::Vector2f Player::getPlayerPosition() {
 }
 
 void Player::game_over() {
-  // let it be this way (at least for now)
-  std::cout << "Game over!";
-  exit(1);
+  // hangs the game, will be properly implemented with game pause menu
+  std::cout << "Game over!\n";
+  while (true) {
+    continue;
+  }
+}
+
+bool Player::check_collision() {
+  for (const auto& enemy : *enemies_vec) {
+    if (enemy->getBounds().intersects(getPlayerBounds())) {
+      return true;
+    }
+  }
+
+  for (const auto& pebble : *enemy_prj_vec) {
+    if (pebble->getProjBounds().intersects(getPlayerBounds())) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
 
-  for (const auto& enemy : *enemies_vec) {
-    if (enemy->getBounds().intersects(getPlayerBounds())
-        && !is_invuln) {
-      if (this->lives > 0) {
-        this->lives--;
-        player_die();
-      }
-      else {  
-        game_over();
-      }
-        }
+  if (check_collision() && !is_invuln) {
+    --lives;
+    player_die();
   }
 
-  for (const auto& pebble : *enemy_prj_vec) {
-    if (pebble->getProjBounds().intersects(getPlayerBounds())
-        && !is_invuln) {
-      if (this->lives > 0) {
-        this->lives--;
-        player_die();
-      }
-      else {
-       game_over();
-      }
-        }
+  if (this->lives == 0) {
+    game_over();
   }
+
 }
 
 bool Player::isMovingOutOfBnds() {
@@ -126,13 +128,9 @@ void Player::kbInputHandler(sf::Keyboard& kb) {
   move(MoveX, MoveY);
 }
 
+// TODO: also make player invulnerable
+// you can also try to implement in inside game loop
 void Player::player_die() {
-  is_invuln = true;
-  invuln_clock.restart();
+  std::clog << "Player got hit\n";
   placeStartPos();
-  PlayerSprite.setColor(sf::Color::Red);
-  if (invuln_clock.getElapsedTime().asMilliseconds() > 1500) {
-    PlayerSprite.setColor(sf::Color::White);
-    is_invuln = false;
-  }
 }
