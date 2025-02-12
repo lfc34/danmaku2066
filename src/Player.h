@@ -17,6 +17,8 @@
 #include "Sound.h"
 #include "Controls.h"
 
+// some of the methods and variables are extremely stupid
+// consider removing them before releasing game
 class Player {
 private:
   sf::Texture PlayerTexture;
@@ -56,7 +58,7 @@ public:
   void move(float x, float y); 
   void fire();
   void kbInputHandler(sf::Keyboard& kb); 
-  void player_die();
+  void player_invuln();
   bool check_collision();
 
   void updatePlayer(sf::RenderWindow& w);

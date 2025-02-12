@@ -63,12 +63,22 @@ bool Player::check_collision() {
 void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
 
-  if (check_collision() && !is_invuln) {
-    --lives;
-    player_die();
+  if (invuln_clock.getElapsedTime().asMilliseconds() < 1500) {
+    is_invuln = true;
+    PlayerSprite.setColor(sf::Color::Red);
+  } else {
+    is_invuln = false;
+    PlayerSprite.setColor(sf::Color::White);
   }
 
-  if (this->lives == 0) {
+  if (check_collision() && !is_invuln) {
+    std::clog << "You've got hit\n";
+    placeStartPos();
+    --lives;
+    invuln_clock.restart();
+  }
+
+  if (this->lives <= 0) {
     game_over();
   }
 
@@ -126,11 +136,4 @@ void Player::kbInputHandler(sf::Keyboard& kb) {
 
   //after movement vector[x, y] is calculated, finally move player
   move(MoveX, MoveY);
-}
-
-// TODO: also make player invulnerable
-// you can also try to implement in inside game loop
-void Player::player_die() {
-  std::clog << "Player got hit\n";
-  placeStartPos();
 }
