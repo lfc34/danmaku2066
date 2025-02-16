@@ -16,8 +16,7 @@
 
 #include "Controls.h"
 
-class Menu 
-{
+class Menu {
 private:
   const unsigned int FontSize {40};
   sf::Font Font;
@@ -37,6 +36,22 @@ public:
   Menu();
   void buttonSelector(sf::RenderWindow& w, sf::Keyboard& k);
 
+};
+
+class PauseMenu : public Menu {
+private:
+  const unsigned int FontSize {40};
+  sf::Font font;
+  sf::Text continue_btn;
+  sf::Text quit_btn;
+  enum Option { Continue, Quit };
+  size_t selected_opt = Continue;
+
+public:
+  PauseMenu();
+  void draw_menu(sf::RenderWindow& w);
+  void set_button(sf::Text& btn, std::string s);
+  int menu_loop(sf::Keyboard& kb);
 };
 
 #endif

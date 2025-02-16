@@ -1,4 +1,3 @@
-//here will be all game loops, because I can't write game loop in main.cpp anymore
 #ifndef GAME_H
 #define GAME_H
 
@@ -28,8 +27,9 @@ public:
 
   Game();
 
-  void menuLoop();
+  int menuLoop();
   void lvl1Loop();
+  void game_pause();
   // TODO: if possible, make it output message about either successful 
   // or either bad exit from game (e.g. crash)
   ~Game();

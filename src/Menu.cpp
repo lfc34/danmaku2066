@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include <SFML/Window/Keyboard.hpp>
 
 using namespace Controls;
 
@@ -72,4 +73,51 @@ void Menu::buttonSelector(sf::RenderWindow& w, sf::Keyboard& k) {
         break;
     }
   }
+}
+
+PauseMenu::PauseMenu() {
+  if(!(font.loadFromFile("../assets/gfx/HussarBold.otf"))) {
+    std::cerr << "Error loading font. Exiting...\n";
+    exit(1);
+  }
+  setButton(continue_btn, "Continue game");
+  continue_btn.setPosition(100, 200);
+
+  setButton(quit_btn, "Quit game");
+  quit_btn.setPosition(100, 250);
+  selectButton(&continue_btn); 
+}
+
+void PauseMenu::draw_menu(sf::RenderWindow& w) {
+  w.clear();
+  w.draw(continue_btn);
+  w.draw(quit_btn);
+  w.display();
+}
+
+int PauseMenu::menu_loop(sf::Keyboard& kb) {
+  if (kb.isKeyPressed(DOWN)) {
+    unselectButton(&continue_btn);
+    selectButton(&quit_btn);
+    selected_opt = Quit;
+  } else if (kb.isKeyPressed(UP)) {
+    unselectButton(&quit_btn);
+    selectButton(&continue_btn);
+    selected_opt = Continue;
+  }
+
+  switch(selected_opt) {
+    case Continue:
+      if(kb.isKeyPressed(Z_K))
+        return 1;
+      break;
+
+    case Quit:
+      if(kb.isKeyPressed(Z_K)) {
+        std::clog << "game exit\n";
+        exit(1);
+      }
+      break;
+  }
+  return 0;
 }

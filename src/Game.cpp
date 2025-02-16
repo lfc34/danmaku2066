@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Enemy.h"
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -10,12 +9,21 @@ window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
   std::clog << "Game instance created\n";
 }
 
-// TODO: check .h file
+void Game::game_pause() {
+  constexpr bool Continue {1};
+  PauseMenu pm;
+  while (window.isOpen()) {
+    pm.draw_menu(window);
+    if(pm.menu_loop(kb) == Continue) 
+      break;
+  }
+}
+
 Game::~Game() {
   std::clog << "Game finished succesfully (i hope so)\n";
 }
 
-void Game::menuLoop() {   
+int Game::menuLoop() {   
   Menu menu;
   while(window.isOpen() && !(menu.GameStarted)) {
     window.clear();
@@ -24,6 +32,10 @@ void Game::menuLoop() {
     window.display();
   }
   window.clear();
+  if (menu.GameStarted)
+    return 0;
+  else  
+    return 1;
 }
 
 void Game::lvl1Loop() {
@@ -47,8 +59,12 @@ void Game::lvl1Loop() {
                            enemy_vec, enemy_proj_vec);
 
   // timers
+  float delta;
+  sf::Clock frame_clock;
   sf::Clock waveTimer;
+  sf::Clock enemy_spawn_timer;
   sf::Clock BossTimer;
+  sf::Clock button_timer;
 
   // RNG part. Let it be here, maybe I'll need it later.
   // for now enemies will spawn in waves in predefined pattern
@@ -71,7 +87,9 @@ void Game::lvl1Loop() {
   // Wrong. TODO: replace as a struct
   // Try to implement 3-point system
   std::vector<EnemyPathWay> directions;
+  // there is more points to add, !!!REMEMBER!!!
   EnemyPathWay wave1 = {
+    sf::Vector2f (0, 0),
     sf::Vector2f (200, 200),
     sf::Vector2f (400, -200)
   };
@@ -89,69 +107,68 @@ void Game::lvl1Loop() {
     }
 
     // zaebalo
-    if (kb.isKeyPressed(sf::Keyboard::Key::Escape))
+    if (kb.isKeyPressed(sf::Keyboard::Key::X))
       window.close();
 
     window.clear();
 
     lvl1.drawLevel(window); // must be first in draw order
 
-    /* collision logic
-      if enemy rectangle intersects any kind
-      of bullet object rectangle, they hp goes down */
     // ENEMY WAVES PART //
     if (enemyCntWave.at(currentWave) > 0 
-       && waveTimer.getElapsedTime().asSeconds() > 0.2) {
+       && waveTimer.getElapsedTime().asSeconds() > 3) {
 
-      enemy_vec->emplace_back(std::make_unique<MoonStone>
-              (sf::Vector2f(0,0), ProjVec, enemy_proj_vec,
-              directions.at(currentWave)));
+      if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {     
+        enemy_vec->emplace_back(std::make_unique<MoonStone>
+                (wave1.spawn_pos, ProjVec, enemy_proj_vec,
+                directions.at(currentWave)));
 
-      --enemyCntWave.at(currentWave);
-      waveTimer.restart();
+        --enemyCntWave.at(currentWave);
+        enemy_spawn_timer.restart();
+      }
+      // !!!Don't forget out of bounds check
+      // if (enemyCntWave.at(currentWave) <= 0)
+        // ++currentWave;
     }
 
-    for (auto& i : *enemy_vec) {
-      i->updateEnemy();
-      window.draw(i->getSprite());
+    for (auto& enemy : *enemy_vec) {
+      if(!(enemy->is_dead)) {
+        enemy->updateEnemy();
+        window.draw(enemy->getSprite());
+      } 
     }
     // ENEMY WAVES PART //
 
-    // TODO: write a prjUpdate() in game method for scaleability
-    for (auto& i : *ProjVec) {
-      if (i->isFlewAway() && !(ProjVec->empty())) {
+    for (auto& plr_proj : *ProjVec) {
+      if (plr_proj->isFlewAway() && !(ProjVec->empty())) {
         ProjVec->erase(ProjVec->begin());
         ProjVec->shrink_to_fit();
         break; // it's just works
       }
       else {
-        i->update();
-        window.draw(i->getShape());
+        plr_proj->update(delta);
+        window.draw(plr_proj->getShape());
       }
     }
     
-    // TODO: VERY buggy, because enemy projectiles that are flew away
-    // delete ones who are not. 
-    // Possible solution: after projectile flew away make them transparent (xd)
-    // this will not unload them from memory completely (like player bullets do)
-    // but at least will save some video mem
-    for (auto& i : *enemy_proj_vec) {
-      // if (i->isFlewAway() && !(enemy_proj_vec->empty())) {
-      //   enemy_proj_vec->erase(enemy_proj_vec->begin());
-      //   enemy_proj_vec->shrink_to_fit();
-      //   break; // it's just works
-      // }
-      // else {
-      i->update();
-      window.draw(i->getShape());
-      // }
+    for (auto& enm_proj : *enemy_proj_vec) {
+      if(!enm_proj->isFlewAway()) {
+        enm_proj->update(delta);
+        window.draw(enm_proj->getShape());
+      }
     }
      
-    // TODO: change order for readability
-    player->kbInputHandler(kb);
+    // func returns 1 only if ESC was pressed
+    if(player->kbInputHandler(kb, delta) == 1) { 
+      lvl1.stop_music();
+      game_pause();
+      lvl1.playMusic();
+    }
+
     player->updatePlayer(window);
 
     // draw what have been rendered so far
     window.display();                              
+    delta = (float)frame_clock.restart().asSeconds();
   }
 }
