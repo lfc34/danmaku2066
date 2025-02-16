@@ -27,6 +27,7 @@ Player::Player(std::shared_ptr<SoundManager> smg,
   loadPlayerModel();
   PlayerSprite.setOrigin(25, 0);
   placeStartPos();
+  is_invuln = false;
 }
 
 sf::Rect<float> Player::getPlayerBounds() {
@@ -40,20 +41,24 @@ sf::Vector2f Player::getPlayerPosition() {
 void Player::game_over() {
   // hangs the game, will be properly implemented with game pause menu
   std::cout << "Game over!\n";
+  sf::Keyboard kb;
   while (true) {
-    continue;
+    if(kb.isKeyPressed(sf::Keyboard::Key::Escape))
+      exit(0);
   }
 }
 
 bool Player::check_collision() {
   for (const auto& enemy : *enemies_vec) {
-    if (enemy->getBounds().intersects(getPlayerBounds())) {
+    if(enemy->getBounds().intersects(getPlayerBounds())) {
+      PlayerSprite.setColor(sf::Color::Red);
       return true;
     }
   }
 
-  for (const auto& pebble : *enemy_prj_vec) {
-    if (pebble->getProjBounds().intersects(getPlayerBounds())) {
+  for (const auto& proj : *enemy_prj_vec) {
+    if(proj->getProjBounds().intersects(getPlayerBounds())) {
+      PlayerSprite.setColor(sf::Color::Red);
       return true;
     }
   }
@@ -63,22 +68,18 @@ bool Player::check_collision() {
 void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
 
-  if (invuln_clock.getElapsedTime().asMilliseconds() < 1500) {
-    is_invuln = true;
-    PlayerSprite.setColor(sf::Color::Red);
-  } else {
-    is_invuln = false;
+  if((is_invuln = invuln_clock.getElapsedTime().asMilliseconds() < 1500))
+    PlayerSprite.setColor(sf::Color::Blue);
+  else  
     PlayerSprite.setColor(sf::Color::White);
-  }
 
-  if (check_collision() && !is_invuln) {
-    std::clog << "You've got hit\n";
-    placeStartPos();
+  if(check_collision() && !is_invuln) {
     --lives;
+    placeStartPos();
     invuln_clock.restart();
-  }
+  }  
 
-  if (this->lives <= 0) {
+  if (lives <= 0) {
     game_over();
   }
 
@@ -89,8 +90,8 @@ bool Player::isMovingOutOfBnds() {
          getPlayerPosition().x > 775 || getPlayerPosition().y > 535;
 }
 
-void Player::move(float x, float y) {
-  PlayerSprite.move(x, y);
+void Player::move(float x, float y, const float& delta) {
+  PlayerSprite.move(x * delta, y * delta);
   if (isMovingOutOfBnds())
     PlayerSprite.move(-x, -y); // trolling
 }
@@ -102,7 +103,13 @@ void Player::fire() {
   // std::clog << "Bullet stored in vector\n";
 }
 
-void Player::kbInputHandler(sf::Keyboard& kb) {
+int Player::kbInputHandler(sf::Keyboard& kb, const float& delta) {
+  // pause the game
+  if(kb.isKeyPressed(ESC)) {
+    return 1;
+  }
+
+  // fire
   if(kb.isKeyPressed(Z_K)) {
     if(PlayerShootTimer.getElapsedTime().asMilliseconds() >= 125) {
       fire();
@@ -135,5 +142,6 @@ void Player::kbInputHandler(sf::Keyboard& kb) {
   }
 
   //after movement vector[x, y] is calculated, finally move player
-  move(MoveX, MoveY);
+  move(MoveX, MoveY, delta);
+  return 0;
 }

@@ -22,7 +22,7 @@ private:
 	
 public:
   Projectile() = default;
-  virtual void update() = 0;
+  virtual void update(const float& delta) = 0;
   virtual const sf::Rect<float> getProjBounds() = 0;
   virtual const sf::CircleShape& getShape() = 0;
   virtual bool isFlewAway() = 0;
@@ -31,7 +31,7 @@ public:
 class Bullet : public Projectile {
 private:
 	// -15 because it moves up
-	const float Speed = -15.0f;
+	const float Speed = -900.0f; // speed in px/sec
 	sf::CircleShape ProjShape;
   bool flewAway;
 
@@ -39,13 +39,13 @@ public:
 	Bullet(sf::Vector2f ShootPos);
   bool isFlewAway() override;
   const sf::Rect<float> getProjBounds() override;
-	void update() override;	
+	void update(const float& delta) override;	
   const sf::CircleShape& getShape() override;
 }; 
 
 class Pebble : public Projectile {
 	private: 
-		const float Speed = 5.0f;
+		const float Speed = 300.0f;
 		sf::CircleShape ProjShape;
     bool flewAway;
 
@@ -54,7 +54,7 @@ class Pebble : public Projectile {
     bool isFlewAway() override;
     const sf::Rect<float> getProjBounds() override;
     const sf::CircleShape& getShape() override;
-		void update() override;
+		void update(const float& delta) override;
 };
 
 #endif

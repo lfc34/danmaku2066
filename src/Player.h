@@ -23,15 +23,15 @@ class Player {
 private:
   sf::Texture PlayerTexture;
   sf::Sprite PlayerSprite;
-  const float PlayerSpeed = 5.0f;
+  const float PlayerSpeed = 300.0f;
   // precisely calculated lmao
   const float DiagSlowdown = 1.414213f; 
   const float StartPosX = 400;
   const float StartPosY = 500;
 
   unsigned int lives = 3;
-  bool is_invuln = false;
   sf::Clock invuln_clock;
+  bool is_invuln = false;
   
   // this made to avoid matryoshka when you pass address
   // to one function to pass it to another func etc
@@ -55,9 +55,10 @@ public:
   sf::Rect<float> getPlayerBounds(); 
 
   bool isMovingOutOfBnds();
-  void move(float x, float y); 
+  void move(float x, float y, const float& delta); 
   void fire();
-  void kbInputHandler(sf::Keyboard& kb); 
+  // returns int because it's signal to potentially pause the game
+  int kbInputHandler(sf::Keyboard& kb, const float& delta); 
   void player_invuln();
   bool check_collision();
 

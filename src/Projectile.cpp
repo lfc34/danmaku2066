@@ -10,12 +10,9 @@ Bullet::Bullet(sf::Vector2f ShootPos) {
   // std::clog << "Bullet spawned\n";
 }
 
-void Bullet::update() {
-  // if (ProjShape.getGlobalBounds().contains(/* anything */))
-  //   enemy->getHp() - 1;
-
+void Bullet::update(const float& delta) {
   if (!flewAway)
-	  ProjShape.move(0, Speed);
+	  ProjShape.move(0, Speed * delta);
 
 	// check if bullet flew away from screen here
   if (ProjShape.getPosition().y < 0)
@@ -43,9 +40,9 @@ Pebble::Pebble(sf::Vector2f ShootPos) {
   flewAway = 0;
 }
 
-void Pebble::update() {
+void Pebble::update(const float& delta) {
   if (!flewAway)
-    ProjShape.move(0, Speed);
+    ProjShape.move(0, Speed * delta);
   if (ProjShape.getPosition().y > 1200)
     flewAway = true;
 }
