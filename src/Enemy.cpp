@@ -22,7 +22,7 @@ MoonStone::MoonStone(sf::Vector2f SpawnPos,
 	EnemySprite.setOrigin(30, 30);
   path = p;
   current_direction = path.mid_point;
-  std::clog << "Enemy spawned\n";
+  is_dead = false;
 }
 
 void MoonStone::updateEnemy() {
@@ -32,7 +32,8 @@ void MoonStone::updateEnemy() {
       this->hp--;
   }
   if (this->hp == 0)
-    die();
+    is_dead = true;
+
   EnemySprite.rotate(10);
   enemyShoot();
   if (EnemySprite.getPosition() == path.mid_point)
@@ -46,10 +47,6 @@ const sf::Sprite& MoonStone::getSprite() {
 
 unsigned int& MoonStone::getHp() {
   return this->hp;
-}
-
-void MoonStone::die() {
-  EnemySprite.setColor(sf::Color::Transparent);
 }
 
 void MoonStone::enemyShoot() {

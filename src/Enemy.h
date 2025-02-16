@@ -17,17 +17,18 @@
 
 // TODO: add more point for more curve line
 struct EnemyPathWay {
-  sf::Vector2f mid_point;
-  sf::Vector2f end_point;
+  sf::Vector2f spawn_pos {};
+  sf::Vector2f mid_point {};
+  sf::Vector2f end_point {};
 };
 
 class Enemy {
 public: 
+  bool is_dead = false;
 	virtual void updateEnemy() = 0;
   virtual void enemyShoot() = 0;
   virtual sf::Rect<float> getBounds() = 0;
   virtual const sf::Sprite& getSprite() = 0;
-  virtual void die() = 0;
   virtual unsigned int& getHp() = 0;
   virtual ~Enemy();
 };
@@ -56,7 +57,6 @@ public:
   sf::Rect<float> getBounds() override;
   const sf::Sprite& getSprite() override;
   unsigned int& getHp() override;
-  void die() override;
 };
 
 #endif
