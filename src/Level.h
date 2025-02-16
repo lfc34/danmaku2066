@@ -22,6 +22,7 @@ public:
 	void drawLevel(sf::RenderWindow& w);
 	// TODO: in future the volume of music will be set in settings
 	void playMusic();
+	void stop_music();
 };
 
 #endif

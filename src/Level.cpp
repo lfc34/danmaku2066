@@ -30,3 +30,7 @@ void Level::playMusic()
 	LvlMusic.setVolume(65);
 	LvlMusic.play();
 }
+
+void Level::stop_music() {
+	LvlMusic.pause();
+}
