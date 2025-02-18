@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Enemy.h"
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -79,22 +80,18 @@ void Game::lvl1Loop() {
   
   //=========================WAVE SPECIFIC DATA==============================//
   // Wave index
-  unsigned int currentWave {0};
+  [[maybe_unused]]unsigned int currentWave {0};
 
   // Number of enemies for every wave
   std::vector<unsigned int> enemyCntWave = {10, 10};
 
-  // Wrong. TODO: replace as a struct
-  // Try to implement 3-point system
   std::vector<EnemyPathWay> directions;
-  // there is more points to add, !!!REMEMBER!!!
   EnemyPathWay wave1 = {
     sf::Vector2f (0, 0),
     sf::Vector2f (200, 200),
     sf::Vector2f (400, -200)
   };
   directions.push_back(wave1);
-
   //=========================WAVE SPECIFIC DATA==============================//
 
   while(window.isOpen()) {
@@ -106,13 +103,13 @@ void Game::lvl1Loop() {
       }
     }
 
-    // zaebalo
+    // TODO: remove in release ver
     if (kb.isKeyPressed(sf::Keyboard::Key::X))
       window.close();
 
     window.clear();
 
-    lvl1.drawLevel(window); // must be first in draw order
+    lvl1.drawLevel(window); 
 
     // ENEMY WAVES PART //
     if (enemyCntWave.at(currentWave) > 0 
@@ -132,10 +129,12 @@ void Game::lvl1Loop() {
     }
 
     for (auto& enemy : *enemy_vec) {
-      if(!(enemy->is_dead)) {
+      if(enemy->is_dead) {
+        enemy->send_to_valhalla(enemy->getSprite());
+      } else {
         enemy->updateEnemy();
         window.draw(enemy->getSprite());
-      } 
+      }
     }
     // ENEMY WAVES PART //
 

@@ -4,6 +4,9 @@ Enemy::~Enemy() {
   std::clog << "Enemy dies\n";
 }
 
+void Enemy::send_to_valhalla(sf::Sprite& sprite) {
+  sprite.setPosition(-800, -600);
+}
 // wow, that's quite big. Impressive
 MoonStone::MoonStone(sf::Vector2f SpawnPos,
                      std::shared_ptr<std::vector<
@@ -36,12 +39,13 @@ void MoonStone::updateEnemy() {
 
   EnemySprite.rotate(10);
   enemyShoot();
+  // TODO: remove this hardcoded shit.
   if (EnemySprite.getPosition() == path.mid_point)
     current_direction = path.end_point;
   EnemySprite.move(FallingSpeed * current_direction);
 }
 
-const sf::Sprite& MoonStone::getSprite() {
+sf::Sprite& MoonStone::getSprite() {
   return EnemySprite;
 }
 
