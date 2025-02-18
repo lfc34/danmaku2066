@@ -43,7 +43,7 @@ Pebble::Pebble(sf::Vector2f ShootPos) {
 void Pebble::update(const float& delta) {
   if (!flewAway)
     ProjShape.move(0, Speed * delta);
-  if (ProjShape.getPosition().y > 1200)
+  if (ProjShape.getPosition().y > 600)
     flewAway = true;
 }
 
