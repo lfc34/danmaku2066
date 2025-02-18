@@ -51,14 +51,12 @@ void Player::game_over() {
 bool Player::check_collision() {
   for (const auto& enemy : *enemies_vec) {
     if(enemy->getBounds().intersects(getPlayerBounds())) {
-      PlayerSprite.setColor(sf::Color::Red);
       return true;
     }
   }
 
   for (const auto& proj : *enemy_prj_vec) {
     if(proj->getProjBounds().intersects(getPlayerBounds())) {
-      PlayerSprite.setColor(sf::Color::Red);
       return true;
     }
   }
@@ -93,7 +91,7 @@ bool Player::isMovingOutOfBnds() {
 void Player::move(float x, float y, const float& delta) {
   PlayerSprite.move(x * delta, y * delta);
   if (isMovingOutOfBnds())
-    PlayerSprite.move(-x, -y); // trolling
+    PlayerSprite.move(-x * delta, -y * delta); // trolling
 }
 
 void Player::fire() {
