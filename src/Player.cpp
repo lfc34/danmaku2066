@@ -17,13 +17,13 @@ void Player::placeStartPos() {
 }
 
 Player::Player(std::shared_ptr<SoundManager> smg,             
-               std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv,
-               std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies,
-               std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> en) {
+               std::vector<std::unique_ptr<Projectile>>& pv,
+               std::vector<std::unique_ptr<Enemy>>& enemies,
+               std::vector<std::unique_ptr<Projectile>>& en) {
   SndMgr = smg;
-  ProjVec = pv;
-  enemy_prj_vec = en;
-  enemies_vec = enemies;
+  proj_vec_ptr = &pv;
+  enemy_prj_vec_ptr = &en;
+  enemies_vec_ptr = &enemies;
   loadPlayerModel();
   PlayerSprite.setOrigin(25, 0);
   placeStartPos();
@@ -49,13 +49,13 @@ void Player::game_over() {
 }
 
 bool Player::check_collision() {
-  for (const auto& enemy : *enemies_vec) {
+  for (const auto& enemy : *enemies_vec_ptr) {
     if(enemy->getBounds().intersects(getPlayerBounds())) {
       return true;
     }
   }
 
-  for (const auto& proj : *enemy_prj_vec) {
+  for (const auto& proj : *enemy_prj_vec_ptr) {
     if(proj->getProjBounds().intersects(getPlayerBounds())) {
       return true;
     }
@@ -96,7 +96,7 @@ void Player::move(float x, float y, const float& delta) {
 
 void Player::fire() {
   SndMgr->playSound("bullet_shot");
-  ProjVec->emplace_back
+  proj_vec_ptr->emplace_back
   (std::make_unique<Bullet>(getPlayerPosition()));
   // std::clog << "Bullet stored in vector\n";
 }
@@ -142,4 +142,11 @@ int Player::kbInputHandler(sf::Keyboard& kb, const float& delta) {
   //after movement vector[x, y] is calculated, finally move player
   move(MoveX, MoveY, delta);
   return 0;
+}
+
+Player::~Player() {
+  enemies_vec_ptr = nullptr;
+  proj_vec_ptr = nullptr;
+  enemy_prj_vec_ptr = nullptr;
+  std::clog << "It's okay, babe. Memory leaks can't hurt you now\n";
 }

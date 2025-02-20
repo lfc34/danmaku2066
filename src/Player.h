@@ -36,18 +36,24 @@ private:
   // this made to avoid matryoshka when you pass address
   // to one function to pass it to another func etc
   std::shared_ptr<SoundManager> SndMgr;
-  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> ProjVec;
-  std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_prj_vec;
-  std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies_vec;
+  std::vector<std::unique_ptr<Projectile>>* proj_vec_ptr;
+  // std::shared_ptr<sstd::vector<std::unique_ptr<Projectile>>> enemy_prj_vec;
+  std::vector<std::unique_ptr<Projectile>>* enemy_prj_vec_ptr;
+  // std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enemies_vec;
+  std::vector<std::unique_ptr<Enemy>>* enemies_vec_ptr;
 
 public:
   void game_over();
   void loadPlayerModel();
   void placeStartPos();
   Player(std::shared_ptr<SoundManager> smg,
-         std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> pv,
-         std::shared_ptr<std::vector<std::unique_ptr<Enemy>>> enm_vec,
-         std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> en_proj_vec);
+         std::vector<std::unique_ptr<Projectile>>& pv,
+         std::vector<std::unique_ptr<Enemy>>& enm_vec,
+         std::vector<std::unique_ptr<Projectile>>& en_proj_vec);
+
+  /** Destructor made only to avoid memory leaks.
+      @brief set all object pointers to nullptr */
+  ~Player();
 
   sf::Clock PlayerShootTimer; 
 

@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Enemy.h"
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -45,22 +44,17 @@ void Game::lvl1Loop() {
   // Sound manager to share across classes that need it
   std::shared_ptr SndMgr = std::make_shared<SoundManager>();
 
-  // Projectile vector made shared for other classes that need it
-  std::shared_ptr ProjVec = 
-  std::make_shared<std::vector
-  <std::unique_ptr<Projectile>>>();
-
-  std::shared_ptr enemy_proj_vec =
-  std::make_shared<std::vector<std::unique_ptr<Projectile>>>();
-
-  std::shared_ptr enemy_vec = std::make_shared<std::vector<std::unique_ptr<Enemy>>>();
+  // vectors to store projectiles and entities
+  std::vector<std::unique_ptr<Projectile>> ProjVec {};
+  std::vector<std::unique_ptr<Projectile>> enemy_proj_vec;
+  std::vector<std::unique_ptr<Enemy>> enemy_vec; 
 
   // player
   std::unique_ptr player = std::make_unique<Player>(SndMgr, ProjVec,
                            enemy_vec, enemy_proj_vec);
 
   // timers
-  float delta;
+  float delta {};
   sf::Clock frame_clock;
   sf::Clock waveTimer;
   sf::Clock enemy_spawn_timer;
@@ -85,12 +79,8 @@ void Game::lvl1Loop() {
   // Number of enemies for every wave
   std::vector<unsigned int> enemyCntWave = {10, 10};
 
-  std::vector<EnemyPathWay> directions;
-  EnemyPathWay wave1 = {
-    sf::Vector2f (0, 0),
-    sf::Vector2f (200, 200),
-    sf::Vector2f (400, -200)
-  };
+  std::vector<MovePattern> directions;
+  MovePattern wave1;
   directions.push_back(wave1);
   //=========================WAVE SPECIFIC DATA==============================//
 
@@ -102,23 +92,18 @@ void Game::lvl1Loop() {
         break;
       }
     }
-
-    // TODO: remove in release ver
-    if (kb.isKeyPressed(sf::Keyboard::Key::X))
-      window.close();
-
     window.clear();
 
     lvl1.drawLevel(window); 
 
     // ENEMY WAVES PART //
+    // this loop can be refactored as a function to fill enemy vector
     if (enemyCntWave.at(currentWave) > 0 
        && waveTimer.getElapsedTime().asSeconds() > 3) {
 
       if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {     
-        enemy_vec->emplace_back(std::make_unique<MoonStone>
-                (wave1.spawn_pos, ProjVec, enemy_proj_vec,
-                directions.at(currentWave)));
+        enemy_vec.emplace_back(std::make_unique<MoonStone>
+                (ProjVec, enemy_proj_vec, wave1));
 
         --enemyCntWave.at(currentWave);
         enemy_spawn_timer.restart();
@@ -127,8 +112,7 @@ void Game::lvl1Loop() {
       // if (enemyCntWave.at(currentWave) <= 0)
         // ++currentWave;
     }
-
-    for (auto& enemy : *enemy_vec) {
+    for (auto& enemy : enemy_vec) {
       if(enemy->is_dead) {
         enemy->send_to_valhalla(enemy->getSprite());
       } else {
@@ -138,11 +122,11 @@ void Game::lvl1Loop() {
     }
     // ENEMY WAVES PART //
 
-    for (auto& plr_proj : *ProjVec) {
-      if (plr_proj->isFlewAway() && !(ProjVec->empty())) {
-        ProjVec->erase(ProjVec->begin());
-        ProjVec->shrink_to_fit();
-        break; // it's just works
+    for (auto& plr_proj : ProjVec) {
+      if (plr_proj->isFlewAway() && !(ProjVec.empty())) {
+        ProjVec.erase(ProjVec.begin());
+        ProjVec.shrink_to_fit();
+        break; 
       }
       else {
         plr_proj->update(delta);
@@ -150,7 +134,7 @@ void Game::lvl1Loop() {
       }
     }
     
-    for (auto& enm_proj : *enemy_proj_vec) {
+    for (auto& enm_proj : enemy_proj_vec) {
       if(!enm_proj->isFlewAway()) {
         enm_proj->update(delta);
         window.draw(enm_proj->getShape());
