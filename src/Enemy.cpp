@@ -7,6 +7,7 @@ Enemy::~Enemy() {
 void Enemy::send_to_valhalla(sf::Sprite& sprite) {
   sprite.setPosition(-800, -600);
 }
+
 MoonStone::MoonStone(std::vector<std::unique_ptr<Projectile>>& plr_prj_vec, 
                      std::vector<std::unique_ptr<Projectile>>& enm_prj_vec,
                      MovePattern pattern) {
@@ -21,27 +22,28 @@ MoonStone::MoonStone(std::vector<std::unique_ptr<Projectile>>& plr_prj_vec,
 	EnemySprite.setOrigin(30, 30);
   path = pattern;
   current_direction = path.mid_point;
-  is_dead = false;
+  state = ALIVE;
 }
 
-void MoonStone::enemy_move() {
-  if(EnemySprite.getPosition() == path.mid_point)
+void MoonStone::enemy_move([[maybe_unused]]const float& delta) {
+  if(EnemySprite.getPosition().y >= path.mid_point.y)
     current_direction = path.end_point;
-  EnemySprite.move(current_direction * FallingSpeed);
+  EnemySprite.move(current_direction * FallingSpeed * delta);
 }
 
-void MoonStone::updateEnemy() {
+void MoonStone::updateEnemy(const float& delta) {
   // checks for enemy<->bullet collision
-  for (const auto& i : *plr_prj_vec_ptr) {
-    if (EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+  for(const auto& i : *plr_prj_vec_ptr) {
+    if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
       this->hp--;
   }
-  if (this->hp == 0)
-    is_dead = true;
-
+  if(this->hp == 0)
+    state = DEAD;
+  if(getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
+    state = FLEW_AWAY;
   EnemySprite.rotate(10);
   enemyShoot();
-  enemy_move();
+  enemy_move(delta);
 }
 
 sf::Sprite& MoonStone::getSprite() {

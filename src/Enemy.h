@@ -25,13 +25,22 @@ struct MovePattern {
 
 class Enemy {
 public: 
-  bool is_dead = false;
+  enum EnemyState {
+    ALIVE,
+    DEAD,
+    FLEW_AWAY
+  };
+  int state = ALIVE;
   /* because otherwise you can get hit by enemy sprite which
   *   hitbox left on the screen after death 
   * @brief Sends enemy sprite out of playable screen
   * @param sprite of any entity */
   void send_to_valhalla(sf::Sprite& sprite);
-	virtual void updateEnemy() = 0;
+  
+  /** @brief increases player score on current level
+  *   @param takes reference to a current level score */
+  void increase_score(unsigned int& score);
+	virtual void updateEnemy(const float& delta) = 0;
   virtual void enemyShoot() = 0;
   virtual sf::Rect<float> getBounds() = 0;
   virtual sf::Sprite& getSprite() = 0;
@@ -43,7 +52,7 @@ class MoonStone : public Enemy {
 private:
   sf::Texture EnemyTexture;
 	sf::Sprite EnemySprite;
-	const float FallingSpeed = 0.02f;
+	const float FallingSpeed = 1.2f;
 	sf::Clock ShootTimer;
   // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> player_pr_vec; 
   // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_pr_vec;
@@ -59,14 +68,14 @@ public:
   /** @brief constructs an enemy, places him in start position
       and gives current moving direction
       @param player projectile vector reference to check collision with player
-      bullets, enemy projectile vector reference to shoot, structs that
+      bullets, enemy projectile vector reference to shoot, struct that
       defines move pattern for enemy*/
   MoonStone(std::vector<std::unique_ptr<Projectile>>& player_prj_vec,
             std::vector<std::unique_ptr<Projectile>>& enm_prj_vec,
             MovePattern pattern);
-	void updateEnemy() override;
+	void updateEnemy(const float& delta) override;
   void enemyShoot() override;
-  void enemy_move();
+  void enemy_move(const float& delta);
   sf::Rect<float> getBounds() override;
   sf::Sprite& getSprite() override;
   unsigned int& getHp() override;
