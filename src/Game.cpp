@@ -39,9 +39,24 @@ int Game::menuLoop() {
 }
 
 void Game::lvl1Loop() {
+  // UI for level
+  sf::Font UI_font;
+  // load UI font
+  if(!UI_font.loadFromFile("../assets/gfx/dynapuff.ttf")) {
+    std::cerr << "Failed to load assets/gfx/dynapuff.tff. Exiting...\n";
+    exit(1);
+  }
+  unsigned int lvl_score {};
+  sf::Text player_score(std::to_string(lvl_score), UI_font, 19);
+  player_score.setPosition(640, 570);
+  sf::Text player_lives;
+  player_lives.setFont(UI_font);
+  player_lives.setCharacterSize(19);
+  player_lives.setPosition(640, 550);
+
   sf::Event event;
 
-  // Sound manager to share across classes that need it
+  // Sound manager to load sounds to buffer and play them
   std::shared_ptr SndMgr = std::make_shared<SoundManager>();
 
   // vectors to store projectiles and entities
@@ -78,7 +93,6 @@ void Game::lvl1Loop() {
 
   // Number of enemies for every wave
   std::vector<unsigned int> enemyCntWave = {10, 10};
-
   std::vector<MovePattern> directions;
   MovePattern wave1;
   directions.push_back(wave1);
@@ -113,10 +127,21 @@ void Game::lvl1Loop() {
         // ++currentWave;
     }
     for (auto& enemy : enemy_vec) {
-      if(enemy->is_dead) {
+      if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {
         enemy->send_to_valhalla(enemy->getSprite());
+        lvl_score += 10;
+        // very expensive operation. Also all enemies blink
+        // when one of them dies
+        enemy_vec.erase(std::find(enemy_vec.begin(), enemy_vec.end(), enemy));
+        enemy_vec.shrink_to_fit();
+        break;
+      } else if (enemy->state == Enemy::FLEW_AWAY && !(enemy_vec.empty())) {
+        enemy->send_to_valhalla(enemy->getSprite());
+        enemy_vec.erase(std::find(enemy_vec.begin(), enemy_vec.end(), enemy));
+        enemy_vec.shrink_to_fit();
+        break;
       } else {
-        enemy->updateEnemy();
+        enemy->updateEnemy(delta);
         window.draw(enemy->getSprite());
       }
     }
@@ -149,6 +174,12 @@ void Game::lvl1Loop() {
     }
 
     player->updatePlayer(window);
+
+    // UI draw part
+    player_score.setString("Score:" + std::to_string(lvl_score));
+    player_lives.setString("Lives:" + std::to_string(player->lives));
+    window.draw(player_score);
+    window.draw(player_lives);
 
     // draw what have been rendered so far
     window.display();                              
