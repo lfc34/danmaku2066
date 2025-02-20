@@ -29,7 +29,6 @@ private:
   const float StartPosX = 400;
   const float StartPosY = 500;
 
-  unsigned int lives = 3;
   sf::Clock invuln_clock;
   bool is_invuln = false;
   
@@ -43,6 +42,7 @@ private:
   std::vector<std::unique_ptr<Enemy>>* enemies_vec_ptr;
 
 public:
+  unsigned int lives = 3;
   void game_over();
   void loadPlayerModel();
   void placeStartPos();
