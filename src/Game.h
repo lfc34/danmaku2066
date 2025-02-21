@@ -30,6 +30,7 @@ public:
   int menuLoop();
   void lvl1Loop();
   void game_pause();
+  void game_over(sf::Font& font, unsigned int& score);
   // TODO: if possible, make it output message about either successful 
   // or either bad exit from game (e.g. crash)
   ~Game();

@@ -25,7 +25,7 @@ Player::Player(std::shared_ptr<SoundManager> smg,
   enemy_prj_vec_ptr = &en;
   enemies_vec_ptr = &enemies;
   loadPlayerModel();
-  PlayerSprite.setOrigin(25, 0);
+  PlayerSprite.setOrigin(18, 0);
   placeStartPos();
   is_invuln = false;
 }
@@ -36,16 +36,6 @@ sf::Rect<float> Player::getPlayerBounds() {
 
 sf::Vector2f Player::getPlayerPosition() {
   return PlayerSprite.getPosition();
-}
-
-void Player::game_over() {
-  // hangs the game, will be properly implemented with game pause menu
-  std::cout << "Game over!\n";
-  sf::Keyboard kb;
-  while (true) {
-    if(kb.isKeyPressed(sf::Keyboard::Key::Escape))
-      exit(0);
-  }
 }
 
 bool Player::check_collision() {
@@ -76,10 +66,6 @@ void Player::updatePlayer(sf::RenderWindow& w) {
     placeStartPos();
     invuln_clock.restart();
   }  
-
-  if (lives <= 0) {
-    game_over();
-  }
 
 }
 

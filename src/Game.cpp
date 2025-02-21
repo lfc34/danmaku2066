@@ -19,6 +19,57 @@ void Game::game_pause() {
   }
 }
 
+void Game::game_over(sf::Font& font, unsigned int& score) {
+  using namespace Controls;
+  sf::Text game_over("Game over!", font, 50);  
+  game_over.setPosition(260, 120);
+
+  sf::Text restart_btn("Restart", font, 25);
+  restart_btn.setPosition(260, 300);
+  restart_btn.setFillColor(sf::Color::Green);
+  sf::Text quit_game_btn("Quit game", font, 25);
+  quit_game_btn.setPosition(260, 340);
+
+  sf::Text final_score("Score: " + std::to_string(score), font, 40);
+  final_score.setPosition(260, 180);
+  final_score.setFillColor(sf::Color::Red);
+
+  enum Options {
+    Restart,
+    Quit
+  };
+
+  size_t option = Restart;
+  while(window.isOpen()) {
+    if (kb.isKeyPressed(UP)) {
+      restart_btn.setFillColor(sf::Color::Green);
+      quit_game_btn.setFillColor(sf::Color::White);
+      option = Restart;
+    } else if (kb.isKeyPressed(Controls::DOWN)) {
+      quit_game_btn.setFillColor(sf::Color::Green);
+      restart_btn.setFillColor(sf::Color::White);
+      option = Quit;
+    }
+    switch (option) {
+      case Restart:
+        if (kb.isKeyPressed(Z_K))
+          lvl1Loop();
+        break;
+
+      case Quit:
+        if (kb.isKeyPressed(Z_K)) 
+          exit(1);
+        break;
+    }
+    window.clear();
+    window.draw(game_over);
+    window.draw(final_score);
+    window.draw(restart_btn);
+    window.draw(quit_game_btn);
+    window.display();
+  }
+}
+
 Game::~Game() {
   std::clog << "Game finished succesfully (i hope so)\n";
 }
@@ -39,6 +90,7 @@ int Game::menuLoop() {
 }
 
 void Game::lvl1Loop() {
+  // TODO: refactor into own class or func
   // UI for level
   sf::Font UI_font;
   // load UI font
@@ -89,15 +141,16 @@ void Game::lvl1Loop() {
   
   //=========================WAVE SPECIFIC DATA==============================//
   // Wave index
-  [[maybe_unused]]unsigned int currentWave {0};
+  unsigned int currentWave {0};
 
   // Number of enemies for every wave
   std::vector<unsigned int> enemyCntWave = {10, 10};
   std::vector<MovePattern> directions;
-  MovePattern wave1;
+  MovePattern wave1 {}; 
   directions.push_back(wave1);
   //=========================WAVE SPECIFIC DATA==============================//
 
+  // ====== GAME LOOP ====== //
   while(window.isOpen()) {
     // allows us to close window via cross on the panel
     while(window.pollEvent(event)) {
@@ -109,6 +162,11 @@ void Game::lvl1Loop() {
     window.clear();
 
     lvl1.drawLevel(window); 
+    if (player->lives <= 0) {
+      std::clog << "Player died\n";
+      lvl1.stop_music();
+      game_over(UI_font, lvl_score);
+    }
 
     // ENEMY WAVES PART //
     // this loop can be refactored as a function to fill enemy vector
@@ -185,4 +243,5 @@ void Game::lvl1Loop() {
     window.display();                              
     delta = (float)frame_clock.restart().asSeconds();
   }
+  // ====== GAME LOOP ====== //
 }

@@ -43,7 +43,6 @@ private:
 
 public:
   unsigned int lives = 3;
-  void game_over();
   void loadPlayerModel();
   void placeStartPos();
   Player(std::shared_ptr<SoundManager> smg,
