@@ -122,11 +122,13 @@ void Game::lvl1Loop() {
 
   // timers
   float delta {};
+  /** Clock that counts time duration of one frame (delta time) */
   sf::Clock frame_clock;
+  /** Clock that controls when wave appears (can be used for boss fight???)*/
   sf::Clock waveTimer;
+  /** Clock that controls how often enemies in wave spawn */
   sf::Clock enemy_spawn_timer;
   sf::Clock BossTimer;
-  sf::Clock button_timer;
 
   // RNG part. Let it be here, maybe I'll need it later.
   // for now enemies will spawn in waves in predefined pattern
@@ -141,13 +143,18 @@ void Game::lvl1Loop() {
   
   //=========================WAVE SPECIFIC DATA==============================//
   // Wave index
-  unsigned int currentWave {0};
+  [[maybe_unused]]int currentWave {0};
 
   // Number of enemies for every wave
-  std::vector<unsigned int> enemyCntWave = {10, 10};
+  int enemies_in_wave[2] = {10, 10};
   std::vector<MovePattern> directions;
   MovePattern wave1 {}; 
   directions.push_back(wave1);
+  MovePattern wave2 {
+    sf::Vector2f (800, 0),
+    sf::Vector2f (-200, 200),
+    sf::Vector2f (-400, -100)
+  };
   //=========================WAVE SPECIFIC DATA==============================//
 
   // ====== GAME LOOP ====== //
@@ -162,31 +169,48 @@ void Game::lvl1Loop() {
     window.clear();
 
     lvl1.drawLevel(window); 
+    // KILL PLAYER WHEN 'X' IS PRESSED (for test purposes)
+    if (kb.isKeyPressed(Controls::X_K))
+      player->lives = 0;
+    
     if (player->lives <= 0) {
       std::clog << "Player died\n";
       lvl1.stop_music();
       game_over(UI_font, lvl_score);
     }
 
-    // ENEMY WAVES PART //
-    // this loop can be refactored as a function to fill enemy vector
-    if (enemyCntWave.at(currentWave) > 0 
-       && waveTimer.getElapsedTime().asSeconds() > 3) {
+    // ====== ENEMY WAVES PART ====== //
 
-      if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {     
-        enemy_vec.emplace_back(std::make_unique<MoonStone>
-                (ProjVec, enemy_proj_vec, wave1));
-
-        --enemyCntWave.at(currentWave);
-        enemy_spawn_timer.restart();
+    // an idea: create switch case for timer
+    // wave 1
+    if (waveTimer.getElapsedTime().asSeconds() > 3) {
+      for (int i = enemies_in_wave[0]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
+          enemy_vec.emplace_back(std::make_unique<MoonStone>
+                                (ProjVec, enemy_proj_vec, wave1));    
+          --enemies_in_wave[0];
+          enemy_spawn_timer.restart();
+        }
       }
-      // !!!Don't forget out of bounds check
-      // if (enemyCntWave.at(currentWave) <= 0)
-        // ++currentWave;
     }
+
+    // wave 2
+    if (waveTimer.getElapsedTime().asSeconds() > 8) {
+      for (int i = enemies_in_wave[1]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
+          enemy_vec.emplace_back(std::make_unique<MoonStone>
+                                (ProjVec, enemy_proj_vec, wave2));
+          --enemies_in_wave[1];
+          enemy_spawn_timer.restart();
+        }
+      }
+    }
+    
+    // ENEMY UPDATE LOOP
     for (auto& enemy : enemy_vec) {
       if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {
         enemy->send_to_valhalla(enemy->getSprite());
+        SndMgr->playSound("fairy_death");
         lvl_score += 10;
         // very expensive operation. Also all enemies blink
         // when one of them dies
@@ -203,8 +227,9 @@ void Game::lvl1Loop() {
         window.draw(enemy->getSprite());
       }
     }
-    // ENEMY WAVES PART //
+    // ====== ENEMY WAVES PART ====== //
 
+    // ====== PROJECTILES PART ====== //
     for (auto& plr_proj : ProjVec) {
       if (plr_proj->isFlewAway() && !(ProjVec.empty())) {
         ProjVec.erase(ProjVec.begin());
@@ -223,6 +248,7 @@ void Game::lvl1Loop() {
         window.draw(enm_proj->getShape());
       }
     }
+    // ====== PROJECTILES PART ====== //
      
     // func returns 1 only if ESC was pressed
     if(player->kbInputHandler(kb, delta) == 1) { 
@@ -234,8 +260,8 @@ void Game::lvl1Loop() {
     player->updatePlayer(window);
 
     // UI draw part
-    player_score.setString("Score:" + std::to_string(lvl_score));
     player_lives.setString("Lives:" + std::to_string(player->lives));
+    player_score.setString("Score:" + std::to_string(lvl_score));
     window.draw(player_score);
     window.draw(player_lives);
 
