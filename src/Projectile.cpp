@@ -1,7 +1,7 @@
 #include "Projectile.h"
 
 Bullet::Bullet(sf::Vector2f ShootPos) {
-  ProjShape.setRadius(3.5);
+  ProjShape.setRadius(3.0f);
 	ProjShape.setPointCount(3);
 	ProjShape.setFillColor(sf::Color::Yellow);
 	ProjShape.setOrigin(1.75, 1.75); //center

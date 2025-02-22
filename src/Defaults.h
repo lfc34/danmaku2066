@@ -4,7 +4,9 @@
 // TODO: look clear for now
 // I can place constants here for setting (future)
 // And a lot of other good constants
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
+constexpr unsigned int SCREEN_WIDTH = 800;
+constexpr unsigned int SCREEN_HEIGHT = 600;
+constexpr bool AUDIO_MUTE = false;
+constexpr float MUSIC_VOLUME = 65;
 
 #endif

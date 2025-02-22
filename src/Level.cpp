@@ -19,15 +19,13 @@ Level::Level(std::string mus_path, std::string texture_path) {
 
 void Level::drawLevel(sf::RenderWindow& w) {
 	w.draw(BgSprite);
-	if(BgSprite.getPosition().y > SCREEN_HEIGHT)
-		BgSprite.setPosition(0, 0);
-  //moving level (illusion of player moving through space)
-	BgSprite.move(0, 1); 
+	if(!(BgSprite.getPosition().y > SCREEN_HEIGHT))
+		BgSprite.move(0, 0.2f); 
 }
 
 void Level::playMusic()
 {
-	LvlMusic.setVolume(65);
+	LvlMusic.setVolume(MUSIC_VOLUME);
 	LvlMusic.play();
 }
 

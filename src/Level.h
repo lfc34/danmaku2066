@@ -19,6 +19,8 @@ private:
 	
 public:
 	Level(std::string mus_path, std::string texture_path);
+	/** @brief Draws background and slowly moves it down, until image ends
+			@param accepts render window to draw background on */
 	void drawLevel(sf::RenderWindow& w);
 	// TODO: in future the volume of music will be set in settings
 	void playMusic();

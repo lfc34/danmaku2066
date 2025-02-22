@@ -21,6 +21,8 @@ void Menu::unselectButton(sf::Text* Btn) {
 
 void Menu::drawMenu(sf::RenderWindow& w) {
   w.draw(StartButton);
+  w.draw(SurvivalMode);
+  w.draw(Mute_Audio);
   w.draw(QuitButton);
 }
 
@@ -31,10 +33,14 @@ Menu::Menu() {
     exit(1);
   }
   setButton(StartButton, "Start");
+  setButton(SurvivalMode, "Survival Mode");
+  setButton(Mute_Audio, "Mute audio");
   setButton(QuitButton, "Quit");
 
-  StartButton.setPosition(350.0, 250.0); //somewhere in center for 800x600
-  QuitButton.setPosition(350.0, 300.0); // a bit below
+  StartButton.setPosition(250.0, 200.0); //somewhere in center for 800x600
+  SurvivalMode.setPosition(250.0, 250.0); // a bit below
+  Mute_Audio.setPosition(250.0, 300.0);
+  QuitButton.setPosition(250.0, 350.0);
   selectButton(&StartButton);
   SelectedOption = Start;
 }

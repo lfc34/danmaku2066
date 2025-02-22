@@ -21,8 +21,10 @@ private:
   const unsigned int FontSize {40};
   sf::Font Font;
   sf::Text StartButton;
+  sf::Text SurvivalMode;
+  sf::Text Mute_Audio;
   sf::Text QuitButton;
-  enum Option { Start, Quit };
+  enum Option { Start, Survival, Mute, Quit };
   std::vector<sf::Text*> MenuButtons;
   size_t SelectedOption;
 
@@ -50,7 +52,6 @@ private:
 public:
   PauseMenu();
   void draw_menu(sf::RenderWindow& w);
-  void set_button(sf::Text& btn, std::string s);
   int menu_loop(sf::Keyboard& kb);
 };
 

@@ -22,8 +22,10 @@ private:
 	};
 
 	Sound BltSound;
+	Sound FairyDeath;
 
 public:
+	int load_snd(Sound& snd, const std::string& snd_path);
 	int loadSounds();
 	SoundManager();
 	~SoundManager();

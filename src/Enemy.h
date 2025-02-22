@@ -56,9 +56,10 @@ private:
 	sf::Clock ShootTimer;
   // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> player_pr_vec; 
   // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_pr_vec;
+
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
-	unsigned int hp = 10;
+	unsigned int hp = 3;
 
   // This two variables below represent the state of enemy movement
   MovePattern path;

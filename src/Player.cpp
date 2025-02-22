@@ -57,7 +57,7 @@ void Player::updatePlayer(sf::RenderWindow& w) {
   w.draw(PlayerSprite);
 
   if((is_invuln = invuln_clock.getElapsedTime().asMilliseconds() < 1500))
-    PlayerSprite.setColor(sf::Color::Blue);
+    PlayerSprite.setColor(sf::Color::Red);
   else  
     PlayerSprite.setColor(sf::Color::White);
 

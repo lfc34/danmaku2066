@@ -1,7 +1,7 @@
 #include "Enemy.h"
 
 Enemy::~Enemy() {
-  std::clog << "Enemy dies\n";
+  // std::clog << "Enemy dies\n";
 }
 
 void Enemy::send_to_valhalla(sf::Sprite& sprite) {
@@ -25,7 +25,7 @@ MoonStone::MoonStone(std::vector<std::unique_ptr<Projectile>>& plr_prj_vec,
   state = ALIVE;
 }
 
-void MoonStone::enemy_move([[maybe_unused]]const float& delta) {
+void MoonStone::enemy_move(const float& delta) {
   if(EnemySprite.getPosition().y >= path.mid_point.y)
     current_direction = path.end_point;
   EnemySprite.move(current_direction * FallingSpeed * delta);
@@ -41,7 +41,6 @@ void MoonStone::updateEnemy(const float& delta) {
     state = DEAD;
   if(getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
     state = FLEW_AWAY;
-  EnemySprite.rotate(10);
   enemyShoot();
   enemy_move(delta);
 }
