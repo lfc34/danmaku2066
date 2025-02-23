@@ -124,6 +124,12 @@ int Player::kbInputHandler(sf::Keyboard& kb, const float& delta) {
     MoveX /= DiagSlowdown;
     MoveY /= DiagSlowdown; 
   }
+  
+  // slow down player if LShift is pressed
+  if(kb.isKeyPressed(SHIFT)) {
+    MoveX /= 1.5f;
+    MoveY /= 1.5f;
+  }
 
   //after movement vector[x, y] is calculated, finally move player
   move(MoveX, MoveY, delta);
