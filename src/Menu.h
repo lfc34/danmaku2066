@@ -55,12 +55,13 @@ private:
   sf::Text continue_btn;
   sf::Text quit_btn;
   enum Option { Continue, Quit };
+  std::vector<sf::Text*> options_list;
   size_t selected_opt = Continue;
 
 public:
   PauseMenu();
   void draw_menu(sf::RenderWindow& w);
-  int menu_loop(sf::Keyboard& kb);
+  int menu_loop(sf::RenderWindow& w);
 };
 
 #endif

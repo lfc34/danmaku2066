@@ -42,26 +42,31 @@ void Game::game_pause() {
   PauseMenu pm;
   while (window.isOpen()) {
     pm.draw_menu(window);
-    if(pm.menu_loop(kb) == Continue) {
+    if(pm.menu_loop(window) == Continue) {
       break;
     }
   }
 }
 
+// better be refactored into another class
 void Game::game_over(sf::Font& font, unsigned int& score) {
   using namespace Controls;
+  
   sf::Text game_over("Game over!", font, 50);  
   game_over.setPosition(260, 120);
 
-  sf::Text restart_btn("Restart", font, 25);
-  restart_btn.setPosition(260, 300);
+  sf::Text restart_btn("Restart", font, 35);
+  restart_btn.setPosition(330, 300);
   restart_btn.setFillColor(sf::Color::Green);
-  sf::Text quit_game_btn("Quit game", font, 25);
-  quit_game_btn.setPosition(260, 340);
+
+  sf::Text quit_game_btn("Quit game", font, 35);
+  quit_game_btn.setPosition(310, 340);
 
   sf::Text final_score("Score: " + std::to_string(score), font, 40);
-  final_score.setPosition(260, 180);
+  final_score.setPosition(310, 180);
   final_score.setFillColor(sf::Color::Red);
+
+  std::vector<sf::Text*> options_list {&restart_btn, &quit_game_btn};
 
   enum Options {
     Restart,
@@ -69,28 +74,36 @@ void Game::game_over(sf::Font& font, unsigned int& score) {
   };
 
   size_t option = Restart;
+  sf::Event event;
   while(window.isOpen()) {
-    if (kb.isKeyPressed(UP)) {
-      restart_btn.setFillColor(sf::Color::Green);
-      quit_game_btn.setFillColor(sf::Color::White);
-      option = Restart;
-    } else if (kb.isKeyPressed(Controls::DOWN)) {
-      quit_game_btn.setFillColor(sf::Color::Green);
-      restart_btn.setFillColor(sf::Color::White);
-      option = Quit;
-    }
-    switch (option) {
-      case Restart:
-        if (kb.isKeyPressed(Z_K))
-          lvl1Loop();
-        break;
-
-      case Quit:
-        if (kb.isKeyPressed(Z_K)) 
-          exit(1);
-        break;
-    }
     window.clear();
+    while(window.pollEvent(event)) {
+      if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+        options_list.at(option)->setFillColor(sf::Color::White);
+        if (option == Restart)
+          option = Quit;
+        else
+          --option;
+        options_list.at(option)->setFillColor(sf::Color::Green);
+      } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+        options_list.at(option)->setFillColor(sf::Color::White);
+        ++option;
+        if (option > Quit)
+          option = Restart;
+        options_list.at(option)->setFillColor(sf::Color::Green);
+      }
+      switch (option) {
+        case Restart:
+          if (event.type == sf::Event::KeyReleased && event.key.code == Z_K)
+            lvl1Loop();
+          break;
+
+        case Quit:
+          if (event.type == sf::Event::KeyReleased && event.key.code == Z_K) 
+            exit(1);
+          break;
+      }
+    }
     window.draw(game_over);
     window.draw(final_score);
     window.draw(restart_btn);

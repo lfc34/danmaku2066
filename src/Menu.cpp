@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 using namespace Controls;
@@ -39,10 +40,10 @@ Menu::Menu() {
   set_button(Mute_Audio, "Audio: ON", Font);
   set_button(QuitButton, "Quit", Font);
 
-  StartButton.setPosition(250.0, 200.0); //somewhere in center for 800x600
+  StartButton.setPosition(340.0, 200.0); //somewhere in center for 800x600
   SurvivalMode.setPosition(250.0, 250.0); // a bit below
-  Mute_Audio.setPosition(250.0, 300.0);
-  QuitButton.setPosition(250.0, 350.0);
+  Mute_Audio.setPosition(300.0, 300.0);
+  QuitButton.setPosition(350.0, 350.0);
   selectButton(&StartButton);
   SelectedOption = Start;
 }
@@ -52,14 +53,16 @@ int Menu::menu_loop(sf::RenderWindow& w) {
   while(w.pollEvent(event)) {
     if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
       unselectButton(MenuButtons.at(SelectedOption));
-      if (SelectedOption == Start) SelectedOption = Quit;
+      if (SelectedOption == Start) 
+        SelectedOption = Quit;
       else  
         --SelectedOption; 
       selectButton(MenuButtons.at(SelectedOption));
     } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
       unselectButton(MenuButtons.at(SelectedOption));
       ++SelectedOption;
-      if (SelectedOption > Quit) SelectedOption = Start;
+      if (SelectedOption > Quit) 
+        SelectedOption = Start;
       selectButton(MenuButtons.at(SelectedOption));
     }
       
@@ -97,11 +100,12 @@ PauseMenu::PauseMenu() {
     exit(1);
   }
   set_button(continue_btn, "Continue game", font);
-  continue_btn.setPosition(100, 200);
+  continue_btn.setPosition(250, 250);
 
   set_button(quit_btn, "Quit game", font);
-  quit_btn.setPosition(100, 250);
+  quit_btn.setPosition(300, 300);
   selectButton(&continue_btn); 
+  options_list = {&continue_btn, &quit_btn};
 }
 
 void PauseMenu::draw_menu(sf::RenderWindow& w) {
@@ -111,29 +115,37 @@ void PauseMenu::draw_menu(sf::RenderWindow& w) {
   w.display();
 }
 
-int PauseMenu::menu_loop(sf::Keyboard& kb) {
-  if (kb.isKeyPressed(DOWN)) {
-    unselectButton(&continue_btn);
-    selectButton(&quit_btn);
-    selected_opt = Quit;
-  } else if (kb.isKeyPressed(UP)) {
-    unselectButton(&quit_btn);
-    selectButton(&continue_btn);
-    selected_opt = Continue;
-  }
+int PauseMenu::menu_loop(sf::RenderWindow& w) {
+  sf::Event event;
+  while (w.pollEvent(event)) {
+    if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+      unselectButton(options_list.at(selected_opt));
+      if (selected_opt == Continue)
+        selected_opt = Quit;
+      else
+       --selected_opt;
+      selectButton(options_list.at(selected_opt));
+    } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+      unselectButton(options_list.at(selected_opt));
+      ++selected_opt;
+      if (selected_opt > Quit)
+        selected_opt = Continue;
+      selectButton(options_list.at(selected_opt));
+    }
 
-  switch(selected_opt) {
-    case Continue:
-      if(kb.isKeyPressed(Z_K))
-        return 1;
-      break;
+    switch(selected_opt) {
+      case Continue:
+        if(event.type == sf::Event::KeyReleased && event.key.code == Z_K)
+          return 1;
+        break;
 
-    case Quit:
-      if(kb.isKeyPressed(Z_K)) {
-        std::clog << "game exit\n";
-        exit(1);
-      }
-      break;
+      case Quit:
+        if(event.type == sf::Event::KeyReleased && event.key.code == Z_K) {
+          std::clog << "game exit\n";
+          exit(1);
+        }
+        break;
+    }
   }
   return 0;
 }
