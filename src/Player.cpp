@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Sound.h"
 
 // to avoid writing sf::Keyboard::Key:Blahblah
 using namespace Controls; 
@@ -16,11 +17,9 @@ void Player::placeStartPos() {
   std::clog << "Placed player at start position\n";
 }
 
-Player::Player(std::shared_ptr<SoundManager> smg,             
-               std::vector<std::unique_ptr<Projectile>>& pv,
+Player::Player(std::vector<std::unique_ptr<Projectile>>& pv,
                std::vector<std::unique_ptr<Enemy>>& enemies,
                std::vector<std::unique_ptr<Projectile>>& en) {
-  SndMgr = smg;
   proj_vec_ptr = &pv;
   enemy_prj_vec_ptr = &en;
   enemies_vec_ptr = &enemies;
@@ -80,23 +79,19 @@ void Player::move(float x, float y, const float& delta) {
     PlayerSprite.move(-x * delta, -y * delta); // trolling
 }
 
-void Player::fire() {
-  SndMgr->playSound("bullet_shot");
+void Player::fire(SoundManager& smg) {
+  smg.playSound("bullet_shot");
   proj_vec_ptr->emplace_back
   (std::make_unique<Bullet>(getPlayerPosition()));
   // std::clog << "Bullet stored in vector\n";
 }
 
-int Player::kbInputHandler(sf::Keyboard& kb, const float& delta) {
-  // pause the game
-  if(kb.isKeyPressed(ESC)) {
-    return 1;
-  }
-
+void Player::input_handler(sf::Keyboard& kb, const float& delta, 
+                           SoundManager& smg) {
   // fire
   if(kb.isKeyPressed(Z_K)) {
     if(PlayerShootTimer.getElapsedTime().asMilliseconds() >= 125) {
-      fire();
+      fire(smg);
       PlayerShootTimer.restart();
     }
   }
@@ -133,7 +128,6 @@ int Player::kbInputHandler(sf::Keyboard& kb, const float& delta) {
 
   //after movement vector[x, y] is calculated, finally move player
   move(MoveX, MoveY, delta);
-  return 0;
 }
 
 Player::~Player() {

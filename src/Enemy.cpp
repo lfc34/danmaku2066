@@ -13,7 +13,7 @@ MoonStone::MoonStone(std::vector<std::unique_ptr<Projectile>>& plr_prj_vec,
                      MovePattern pattern) {
   plr_prj_vec_ptr = &plr_prj_vec;
   enm_prj_vec_ptr = &enm_prj_vec;
-	if(!(EnemyTexture.loadFromFile("../assets/gfx/rock.png"))) {
+	if(!(EnemyTexture.loadFromFile("../assets/gfx/fairy.png"))) {
     std::cerr << "Failed to load enemy texture. Exiting...\n";
     exit(1);
   }

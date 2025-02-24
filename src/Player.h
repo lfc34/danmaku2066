@@ -34,7 +34,6 @@ private:
   
   // this made to avoid matryoshka when you pass address
   // to one function to pass it to another func etc
-  std::shared_ptr<SoundManager> SndMgr;
   std::vector<std::unique_ptr<Projectile>>* proj_vec_ptr;
   // std::shared_ptr<sstd::vector<std::unique_ptr<Projectile>>> enemy_prj_vec;
   std::vector<std::unique_ptr<Projectile>>* enemy_prj_vec_ptr;
@@ -45,8 +44,7 @@ public:
   unsigned int lives = 3;
   void loadPlayerModel();
   void placeStartPos();
-  Player(std::shared_ptr<SoundManager> smg,
-         std::vector<std::unique_ptr<Projectile>>& pv,
+  Player(std::vector<std::unique_ptr<Projectile>>& pv,
          std::vector<std::unique_ptr<Enemy>>& enm_vec,
          std::vector<std::unique_ptr<Projectile>>& en_proj_vec);
 
@@ -61,9 +59,9 @@ public:
 
   bool isMovingOutOfBnds();
   void move(float x, float y, const float& delta); 
-  void fire();
+  void fire(SoundManager& smg);
   // returns int because it's signal to potentially pause the game
-  int kbInputHandler(sf::Keyboard& kb, const float& delta); 
+  void input_handler(sf::Keyboard& kb, const float& delta, SoundManager& smg); 
   void player_invuln();
   bool check_collision();
 
