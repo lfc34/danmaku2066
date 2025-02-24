@@ -19,18 +19,19 @@
 #include <random>
 #include <new>
 
-class Game 
-{
+class Game {
 public:
+  bool IS_GAME_MUTED = false;
+  SoundManager SndMgr;
   sf::RenderWindow window;
   sf::Keyboard kb;
 
   Game();
 
   int menuLoop();
-  void lvl1Loop();
   void game_pause();
   void game_over(sf::Font& font, unsigned int& score);
+  void lvl1Loop();
   // TODO: if possible, make it output message about either successful 
   // or either bad exit from game (e.g. crash)
   ~Game();

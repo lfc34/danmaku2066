@@ -13,6 +13,7 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
 
 #include "Controls.h"
 
@@ -27,16 +28,23 @@ private:
   enum Option { Start, Survival, Mute, Quit };
   std::vector<sf::Text*> MenuButtons;
   size_t SelectedOption;
+  bool is_muted_game = false;
 
 public:
+  enum MenuReturn {
+    START_GAME,
+    MUTE_AUDIO,
+    UNMUTE_AUDIO,
+    QUIT
+  };
   bool GameStarted; //for braking the menu loop in main and start game
 
-  void setButton(sf::Text& Btn, std::string s);
+  void set_button(sf::Text& Btn, std::string s, sf::Font& font);
   void selectButton(sf::Text* Btn);
   void unselectButton(sf::Text* Btn);
   void drawMenu(sf::RenderWindow& w);
   Menu();
-  void buttonSelector(sf::RenderWindow& w, sf::Keyboard& k);
+  int menu_loop(sf::RenderWindow& w);
 
 };
 

@@ -1,4 +1,5 @@
 #include "Level.h"
+#include "Defaults.h"
 
 Level::Level(std::string mus_path, std::string texture_path) {
 	std::clog << "Loading music...\n";
@@ -23,9 +24,12 @@ void Level::drawLevel(sf::RenderWindow& w) {
 		BgSprite.move(0, 0.2f); 
 }
 
-void Level::playMusic()
+void Level::playMusic(bool is_muted)
 {
-	LvlMusic.setVolume(MUSIC_VOLUME);
+  if (is_muted)
+    LvlMusic.setVolume(0);
+  else  
+    LvlMusic.setVolume(MUSIC_VOLUME);
 	LvlMusic.play();
 }
 

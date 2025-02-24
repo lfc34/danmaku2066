@@ -25,6 +25,7 @@ private:
 	Sound FairyDeath;
 
 public:
+  bool is_muted = false;
 	int load_snd(Sound& snd, const std::string& snd_path);
 	int loadSounds();
 	SoundManager();

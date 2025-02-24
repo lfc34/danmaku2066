@@ -23,7 +23,7 @@ public:
 			@param accepts render window to draw background on */
 	void drawLevel(sf::RenderWindow& w);
 	// TODO: in future the volume of music will be set in settings
-	void playMusic();
+	void playMusic(bool is_muted);
 	void stop_music();
 };
 

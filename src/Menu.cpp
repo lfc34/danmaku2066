@@ -3,8 +3,8 @@
 
 using namespace Controls;
 
-void Menu::setButton(sf::Text& Btn, std::string s) {
-  Btn.setFont(Font);
+void Menu::set_button(sf::Text& Btn, std::string s, sf::Font& font) {
+  Btn.setFont(font);
   Btn.setCharacterSize(FontSize);
   Btn.setFillColor(sf::Color::White);
   Btn.setString(s);
@@ -20,10 +20,12 @@ void Menu::unselectButton(sf::Text* Btn) {
 }
 
 void Menu::drawMenu(sf::RenderWindow& w) {
+  w.clear();
   w.draw(StartButton);
   w.draw(SurvivalMode);
   w.draw(Mute_Audio);
   w.draw(QuitButton);
+  w.display();
 }
 
 Menu::Menu() {
@@ -32,10 +34,10 @@ Menu::Menu() {
     std::cerr << "Failed to load font. Exiting...\n";
     exit(1);
   }
-  setButton(StartButton, "Start");
-  setButton(SurvivalMode, "Survival Mode");
-  setButton(Mute_Audio, "Mute audio");
-  setButton(QuitButton, "Quit");
+  set_button(StartButton, "Start", Font);
+  set_button(SurvivalMode, "Survival Mode", Font);
+  set_button(Mute_Audio, "Audio: ON", Font);
+  set_button(QuitButton, "Quit", Font);
 
   StartButton.setPosition(250.0, 200.0); //somewhere in center for 800x600
   SurvivalMode.setPosition(250.0, 250.0); // a bit below
@@ -45,51 +47,59 @@ Menu::Menu() {
   SelectedOption = Start;
 }
 
-void Menu::buttonSelector(sf::RenderWindow& w, sf::Keyboard& k) {
-  // the delay needed because game processes keypresses too fast 
-  // and it's almost impossible to select needed button
-  static sf::Clock kbDelayTimer;
-  int delay = kbDelayTimer.getElapsedTime().asMilliseconds();
-  if (k.isKeyPressed(UP) && delay > 300) {
-    // std::clog << "Up was pressed; Val = " << SelectedOption << "\n";
-    unselectButton(MenuButtons.at(SelectedOption));
-    if (SelectedOption == Start) SelectedOption = Quit;
-    else  
-      --SelectedOption; 
-    selectButton(MenuButtons.at(SelectedOption));
-    delay = kbDelayTimer.restart().asMilliseconds();
-  } else if (k.isKeyPressed(DOWN) && delay > 300) {
-    // std::clog << "Down was pressed; Val = " << SelectedOption << "\n";
-    unselectButton(MenuButtons.at(SelectedOption));
-    ++SelectedOption;
-    if (SelectedOption > Quit) SelectedOption = Start;
-    selectButton(MenuButtons.at(SelectedOption));
-    delay = kbDelayTimer.restart().asMilliseconds();
-  }
-    
-  if (k.isKeyPressed(Z_K)) {
-    switch (SelectedOption) {
-      case Start:
-        //this break menu loop and allow to play the game
-        GameStarted = true; 
-        break;
-            
-      case Quit:
-        w.close();
-        break;
+int Menu::menu_loop(sf::RenderWindow& w) {
+  sf::Event event;
+  while(w.pollEvent(event)) {
+    if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+      unselectButton(MenuButtons.at(SelectedOption));
+      if (SelectedOption == Start) SelectedOption = Quit;
+      else  
+        --SelectedOption; 
+      selectButton(MenuButtons.at(SelectedOption));
+    } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+      unselectButton(MenuButtons.at(SelectedOption));
+      ++SelectedOption;
+      if (SelectedOption > Quit) SelectedOption = Start;
+      selectButton(MenuButtons.at(SelectedOption));
+    }
+      
+    if (event.type == sf::Event::KeyReleased && event.key.code == Z_K) {
+      switch (SelectedOption) {
+        case Start:
+          //this break menu loop and allows to play the game
+          return START_GAME;
+          break;
+
+        case Mute:
+          if (is_muted_game == false) {
+            Mute_Audio.setString("Audio: OFF");
+            is_muted_game = true;
+            return MUTE_AUDIO;
+          } else {
+            Mute_Audio.setString("Audio: ON");
+            is_muted_game = false;
+            return UNMUTE_AUDIO; 
+          }
+          break;
+              
+        case Quit:
+          w.close();
+          break;
+      }
     }
   }
+  return -1;
 }
 
 PauseMenu::PauseMenu() {
-  if(!(font.loadFromFile("../assets/gfx/HussarBold.otf"))) {
+  if(!(font.loadFromFile("../assets/gfx/dynapuff.ttf"))) {
     std::cerr << "Error loading font. Exiting...\n";
     exit(1);
   }
-  setButton(continue_btn, "Continue game");
+  set_button(continue_btn, "Continue game", font);
   continue_btn.setPosition(100, 200);
 
-  setButton(quit_btn, "Quit game");
+  set_button(quit_btn, "Quit game", font);
   quit_btn.setPosition(100, 250);
   selectButton(&continue_btn); 
 }

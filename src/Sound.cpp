@@ -28,10 +28,12 @@ SoundManager::SoundManager() {
 }
 
 void SoundManager::playSound(const std::string& Name) {
-	if (Name == "bullet_shot")
-		BltSound.snd.play();
-	else if (Name == "fairy_death")
-		FairyDeath.snd.play();
+  if(!is_muted) {
+    if (Name == "bullet_shot")
+      BltSound.snd.play();
+    else if (Name == "fairy_death")
+      FairyDeath.snd.play();
+  }
 }
 
 SoundManager::~SoundManager() {
