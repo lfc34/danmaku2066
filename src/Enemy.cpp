@@ -67,8 +67,8 @@ void MoonStone::enemyShoot() {
   }
 }
 
-LizardKiller::LizardKiller(EnemyData& dt, MovePattern mp, 
-                           const sf::Vector2f& spawn_pos) 
+LizardKiller::LizardKiller(EnemyData& dt, MovePattern pattern, 
+                           const sf::Vector2f& spawn_pos)
 {
   plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
   enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
@@ -78,8 +78,19 @@ LizardKiller::LizardKiller(EnemyData& dt, MovePattern mp,
   }
   EnemySprite.setTexture(EnemyTexture);
 	EnemySprite.setPosition(spawn_pos);
-	EnemySprite.setOrigin(30, 30);
-  path = mp;
+  path = pattern;
   current_direction = path.mid_point;
   state = ALIVE; 
+}
+
+void LizardKiller::enemyShoot() {
+
+}
+
+void LizardKiller::enemy_move(const float& delta) {
+  EnemySprite.move(delta * speed * current_direction); 
+}
+
+void LizardKiller::updateEnemy(const float& delta) {
+  enemy_move(delta);
 }

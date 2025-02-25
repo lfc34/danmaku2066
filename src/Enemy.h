@@ -32,7 +32,6 @@ class Enemy {
 protected:
   sf::Texture EnemyTexture;
 	sf::Sprite EnemySprite;
-	float speed {};
 	sf::Clock ShootTimer;
 
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
@@ -54,14 +53,15 @@ public:
   *   hitbox left on the screen after death 
   * @brief Sends enemy sprite out of playable screen
   * @param sprite of any entity */
-  void send_to_valhalla(sf::Sprite& sprite);
   
   /** @brief increases player score on current level
   *   @param takes reference to a current level score */
-  void increase_score(unsigned int& score);
 	virtual void updateEnemy(const float& delta) = 0;
   virtual void enemyShoot() = 0;
   virtual void enemy_move(const float& delta) = 0;
+  
+  void increase_score(unsigned int& score);
+  void send_to_valhalla(sf::Sprite& sprite);
   sf::Rect<float> getBounds();
   sf::Sprite& getSprite();
   unsigned int& getHp();
@@ -89,11 +89,11 @@ private:
   const float speed = 0.5f;
   unsigned int hp = 8;
 public:
-  LizardKiller(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
+  LizardKiller(EnemyData& dt, MovePattern pattern, 
+               const sf::Vector2f& spawn_pos);
 	void updateEnemy(const float& delta) override;
   void enemyShoot() override;
   void enemy_move(const float& delta) override;
-  ~LizardKiller();
 };
 
 #endif

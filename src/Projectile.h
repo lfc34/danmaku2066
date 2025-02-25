@@ -15,11 +15,6 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 class Projectile {
-private:
-	float Speed; 
-	sf::CircleShape ProjShape;
-  bool flewAway;
-	
 public:
   Projectile() = default;
   virtual void update(const float& delta) = 0;
@@ -30,7 +25,6 @@ public:
 
 class Bullet : public Projectile {
 private:
-	// -15 because it moves up
 	const float Speed = -900.0f; // speed in px/sec
 	sf::CircleShape ProjShape;
   bool flewAway;
