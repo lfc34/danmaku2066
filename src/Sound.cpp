@@ -14,6 +14,8 @@ int SoundManager::load_snd(Sound& snd, const std::string& snd_path) {
 int SoundManager::loadSounds() {
 	load_snd(BltSound, "../assets/sfx/b_shot.ogg");
 	load_snd(FairyDeath, "../assets/sfx/fairy_death.ogg");
+  load_snd(PlayerHurt, "../assets/sfx/plr_hurt.ogg");
+  load_snd(PlayerDead, "../assets/sfx/plr_death.ogg");
 	// there will be more sounds later
 	return 0;
 }
@@ -33,6 +35,10 @@ void SoundManager::playSound(const std::string& Name) {
       BltSound.snd.play();
     else if (Name == "fairy_death")
       FairyDeath.snd.play();
+    else if (Name == "player_hurt")
+      PlayerHurt.snd.play();
+    else if (Name == "player_death")
+      PlayerDead.snd.play();
   }
 }
 

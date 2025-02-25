@@ -29,7 +29,7 @@ public:
   Game();
 
   int menuLoop();
-  void game_pause();
+  void game_pause(sf::Clock& wave_timer, sf::Clock& spawn_timer);
   void game_over(sf::Font& font, unsigned int& score);
   void lvl1Loop();
   // TODO: if possible, make it output message about either successful 

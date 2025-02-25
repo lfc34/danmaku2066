@@ -65,7 +65,7 @@ public:
   void player_invuln();
   bool check_collision();
 
-  void updatePlayer(sf::RenderWindow& w);
+  void updatePlayer(sf::RenderWindow& w, SoundManager& smg);
 };
 
 #endif

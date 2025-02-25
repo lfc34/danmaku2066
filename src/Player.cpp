@@ -52,7 +52,7 @@ bool Player::check_collision() {
   return false;
 }
 
-void Player::updatePlayer(sf::RenderWindow& w) {
+void Player::updatePlayer(sf::RenderWindow& w, SoundManager& smg) {
   w.draw(PlayerSprite);
 
   if((is_invuln = invuln_clock.getElapsedTime().asMilliseconds() < 1500))
@@ -61,6 +61,7 @@ void Player::updatePlayer(sf::RenderWindow& w) {
     PlayerSprite.setColor(sf::Color::White);
 
   if(check_collision() && !is_invuln) {
+    smg.playSound("player_hurt");
     --lives;
     placeStartPos();
     invuln_clock.restart();

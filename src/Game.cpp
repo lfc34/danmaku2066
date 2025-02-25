@@ -34,7 +34,7 @@ int Game::menuLoop() {
   return -11;
 }
 
-void Game::game_pause() {
+void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
   enum PauseReturn {
     Continue = 1,
     Restart = 2,
@@ -44,6 +44,9 @@ void Game::game_pause() {
   PauseMenu pm(IS_GAME_MUTED);
   bool paused = true;
   while (window.isOpen() && paused) {
+    // constantly restart timers to keep them at 0
+    wave_clock.restart();
+    spawn_timer.restart();
     pm.draw_menu(window);
     switch (pm.menu_loop(window)) {
       case Continue:
@@ -161,11 +164,11 @@ void Game::lvl1Loop() {
   float delta {};
   /** Clock that counts time duration of one frame (delta time) */
   sf::Clock frame_clock;
-  /** Clock that controls when wave appears (can be used for boss fight???)*/
+  /** Clock that counts time for wave to appear */
   sf::Clock waveTimer;
+  float time_wave {};
   /** Clock that controls how often enemies in wave spawn */
   sf::Clock enemy_spawn_timer;
-  sf::Clock BossTimer;
 
   // RNG part. Let it be here, maybe I'll need it later.
   // for now enemies will spawn in waves in predefined pattern
@@ -210,7 +213,7 @@ void Game::lvl1Loop() {
 
     // player update + input handler
     player->input_handler(kb, delta, SndMgr);
-    player->updatePlayer(window);
+    player->updatePlayer(window, SndMgr);
 
     // UI draw part
     player_lives.setString("Lives:" + std::to_string(player->lives));
@@ -230,13 +233,11 @@ void Game::lvl1Loop() {
       if(event.type == sf::Event::KeyReleased 
         && event.key.code == Controls::ESC) { 
         lvl1.stop_music();
+
         frame_clock.restart();
-        game_pause();
+        game_pause(waveTimer, enemy_spawn_timer);
+        // after continuing the gaem
         lvl1.playMusic(IS_GAME_MUTED);
-        
-        // restart all timers after game continued
-        // TODO: fix bug when you can delay enemy waves
-        waveTimer.restart();
         frame_clock.restart();
         enemy_spawn_timer.restart();
       }
@@ -244,18 +245,19 @@ void Game::lvl1Loop() {
 
     if (player->lives <= 0) {
       std::clog << "Player died\n";
+      SndMgr.playSound("player_death");
       lvl1.stop_music();
       game_over(UI_font, lvl_score);
     }
     
-    
     // ====== ENEMY WAVES PART ====== //
+    time_wave += waveTimer.restart().asSeconds();
     // wave 1
-    if (waveTimer.getElapsedTime().asSeconds() > 3) {
+    if (time_wave > 3) {
       for (int i = enemies_in_wave[0]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<MoonStone>
-                                (ProjVec, enemy_proj_vec, wave1));    
+                                (ProjVec, enemy_proj_vec, wave1, wave1.spawn_pos));    
           --enemies_in_wave[0];
           enemy_spawn_timer.restart();
         }
@@ -263,11 +265,11 @@ void Game::lvl1Loop() {
     }
 
     // wave 2
-    if (waveTimer.getElapsedTime().asSeconds() > 8) {
+    if (time_wave > 8) {
       for (int i = enemies_in_wave[1]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<MoonStone>
-                                (ProjVec, enemy_proj_vec, wave2));
+                                (ProjVec, enemy_proj_vec, wave2, wave2.spawn_pos));
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
         }

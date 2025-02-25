@@ -23,6 +23,8 @@ private:
 
 	Sound BltSound;
 	Sound FairyDeath;
+  Sound PlayerHurt;
+  Sound PlayerDead;
 
 public:
   bool is_muted = false;
