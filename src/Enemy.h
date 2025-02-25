@@ -23,7 +23,26 @@ struct MovePattern {
   sf::Vector2f end_point {400, -100};
 };
 
+struct EnemyData {
+  std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
+  std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
+};
+
 class Enemy {
+protected:
+  sf::Texture EnemyTexture;
+	sf::Sprite EnemySprite;
+	float speed {};
+	sf::Clock ShootTimer;
+
+  std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
+  std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
+	unsigned int hp {};
+
+  // This two variables below represent the state of enemy movement
+  MovePattern path;
+  sf::Vector2f current_direction;
+
 public: 
   enum EnemyState {
     ALIVE,
@@ -42,56 +61,39 @@ public:
   void increase_score(unsigned int& score);
 	virtual void updateEnemy(const float& delta) = 0;
   virtual void enemyShoot() = 0;
-  virtual sf::Rect<float> getBounds() = 0;
-  virtual sf::Sprite& getSprite() = 0;
-  virtual unsigned int& getHp() = 0;
-  virtual ~Enemy();
+  virtual void enemy_move(const float& delta) = 0;
+  sf::Rect<float> getBounds();
+  sf::Sprite& getSprite();
+  unsigned int& getHp();
+  ~Enemy();
 };
 
 class MoonStone : public Enemy {
 private:
-  sf::Texture EnemyTexture;
-	sf::Sprite EnemySprite;
-	const float FallingSpeed = 1.2f;
-	sf::Clock ShootTimer;
-  // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> player_pr_vec; 
-  // std::shared_ptr<std::vector<std::unique_ptr<Projectile>>> enemy_pr_vec;
-
-  std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
-  std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
-	unsigned int hp = 3;
-
-  // This two variables below represent the state of enemy movement
-  MovePattern path;
-  sf::Vector2f current_direction;
-
+  const float FallingSpeed = 1.2f;
+  unsigned int hp = 4;
 public:
   /** @brief constructs an enemy, places him in start position
       and gives current moving direction
       @param player projectile vector reference to check collision with player
       bullets, enemy projectile vector reference to shoot, struct that
       defines move pattern for enemy*/
-  MoonStone(std::vector<std::unique_ptr<Projectile>>& player_prj_vec,
-            std::vector<std::unique_ptr<Projectile>>& enm_prj_vec,
-            MovePattern pattern);
+  MoonStone(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
 	void updateEnemy(const float& delta) override;
   void enemyShoot() override;
-  void enemy_move(const float& delta);
-  sf::Rect<float> getBounds() override;
-  sf::Sprite& getSprite() override;
-  unsigned int& getHp() override;
-  ~MoonStone();
+  void enemy_move(const float& delta) override;
 };
 
-// WARNING!!! THIS CLASS IS FOR TESTS ONLY
-class DummyEnemy {
+class LizardKiller : public Enemy {
 private:
-  const float speed = 300.0f; // for future delta time calc
-  unsigned int hp = 5;
-public: 
-  sf::CircleShape enemy_shape;
-  DummyEnemy();
-  void move_enemy(sf::Vector2f current_direction, float& delta);
+  const float speed = 0.5f;
+  unsigned int hp = 8;
+public:
+  LizardKiller(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
+	void updateEnemy(const float& delta) override;
+  void enemyShoot() override;
+  void enemy_move(const float& delta) override;
+  ~LizardKiller();
 };
 
 #endif

@@ -1,24 +1,37 @@
 #include "Enemy.h"
 
-Enemy::~Enemy() {
-  // std::clog << "Enemy dies\n";
-}
-
 void Enemy::send_to_valhalla(sf::Sprite& sprite) {
   sprite.setPosition(-800, -600);
 }
 
-MoonStone::MoonStone(std::vector<std::unique_ptr<Projectile>>& plr_prj_vec, 
-                     std::vector<std::unique_ptr<Projectile>>& enm_prj_vec,
-                     MovePattern pattern) {
-  plr_prj_vec_ptr = &plr_prj_vec;
-  enm_prj_vec_ptr = &enm_prj_vec;
+sf::Sprite& Enemy::getSprite() {
+  return EnemySprite;
+}
+
+unsigned int& Enemy::getHp() {
+  return this->hp;
+}
+
+sf::Rect<float> Enemy::getBounds() {
+  return EnemySprite.getGlobalBounds();
+}
+
+Enemy::~Enemy() {
+  plr_prj_vec_ptr = nullptr;
+  enm_prj_vec_ptr = nullptr;
+}
+
+MoonStone::MoonStone(EnemyData& dt, MovePattern pattern, 
+                     const sf::Vector2f& spawn_pos) 
+{
+  plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
+  enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
 	if(!(EnemyTexture.loadFromFile("../assets/gfx/fairy.png"))) {
     std::cerr << "Failed to load enemy texture. Exiting...\n";
     exit(1);
   }
   EnemySprite.setTexture(EnemyTexture);
-	EnemySprite.setPosition(pattern.spawn_pos);
+	EnemySprite.setPosition(spawn_pos);
 	EnemySprite.setOrigin(30, 30);
   path = pattern;
   current_direction = path.mid_point;
@@ -45,13 +58,6 @@ void MoonStone::updateEnemy(const float& delta) {
   enemy_move(delta);
 }
 
-sf::Sprite& MoonStone::getSprite() {
-  return EnemySprite;
-}
-
-unsigned int& MoonStone::getHp() {
-  return this->hp;
-}
 
 void MoonStone::enemyShoot() {
   if (ShootTimer.getElapsedTime().asMilliseconds() >= 200) {
@@ -61,11 +67,19 @@ void MoonStone::enemyShoot() {
   }
 }
 
-sf::Rect<float> MoonStone::getBounds() {
-  return EnemySprite.getGlobalBounds();
-}
-
-MoonStone::~MoonStone() {
-  plr_prj_vec_ptr = nullptr;
-  enm_prj_vec_ptr = nullptr;
+LizardKiller::LizardKiller(EnemyData& dt, MovePattern mp, 
+                           const sf::Vector2f& spawn_pos) 
+{
+  plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
+  enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
+	if(!(EnemyTexture.loadFromFile("../assets/gfx/lizard.png"))) {
+    std::cerr << "Failed to load enemy texture. Exiting...\n";
+    exit(1);
+  }
+  EnemySprite.setTexture(EnemyTexture);
+	EnemySprite.setPosition(spawn_pos);
+	EnemySprite.setOrigin(30, 30);
+  path = mp;
+  current_direction = path.mid_point;
+  state = ALIVE; 
 }

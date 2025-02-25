@@ -155,6 +155,10 @@ void Game::lvl1Loop() {
   std::vector<std::unique_ptr<Projectile>> ProjVec {};
   std::vector<std::unique_ptr<Projectile>> enemy_proj_vec;
   std::vector<std::unique_ptr<Enemy>> enemy_vec; 
+  EnemyData ptrs {
+    &ProjVec,
+    &enemy_proj_vec
+  };
 
   // player
   std::unique_ptr player = std::make_unique<Player>(ProjVec,
@@ -257,7 +261,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[0]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<MoonStone>
-                                (ProjVec, enemy_proj_vec, wave1, wave1.spawn_pos));    
+                                (ptrs, wave1, wave1.spawn_pos));    
           --enemies_in_wave[0];
           enemy_spawn_timer.restart();
         }
@@ -269,7 +273,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[1]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<MoonStone>
-                                (ProjVec, enemy_proj_vec, wave2, wave2.spawn_pos));
+                                (ptrs, wave2, wave2.spawn_pos));
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
         }
