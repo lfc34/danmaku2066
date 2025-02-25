@@ -14,11 +14,14 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include "Controls.h"
 
 class Menu {
 private:
+  sf::Texture bg_texture;
+  sf::Sprite bg_img;
   const unsigned int FontSize {40};
   sf::Font Font;
   sf::Text StartButton;
@@ -53,13 +56,16 @@ private:
   const unsigned int FontSize {40};
   sf::Font font;
   sf::Text continue_btn;
+  sf::Text restart_btn;
+  sf::Text mute_btn;
   sf::Text quit_btn;
-  enum Option { Continue, Quit };
+  enum Option { Continue, Restart, Mute, Quit };
   std::vector<sf::Text*> options_list;
   size_t selected_opt = Continue;
+  // Makes it possible to mute game via pause menu
 
 public:
-  PauseMenu();
+  PauseMenu(bool& is_muted_game);
   void draw_menu(sf::RenderWindow& w);
   int menu_loop(sf::RenderWindow& w);
 };

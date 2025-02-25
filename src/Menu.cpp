@@ -22,6 +22,7 @@ void Menu::unselectButton(sf::Text* Btn) {
 
 void Menu::drawMenu(sf::RenderWindow& w) {
   w.clear();
+  w.draw(bg_img);
   w.draw(StartButton);
   w.draw(SurvivalMode);
   w.draw(Mute_Audio);
@@ -31,6 +32,11 @@ void Menu::drawMenu(sf::RenderWindow& w) {
 
 Menu::Menu() {
   GameStarted = false;
+  if(!bg_texture.loadFromFile("../assets/gfx/menu_bg.png")) {
+    std::cerr << "Failder to load menu bg image\n";
+    exit(1);
+  }
+  bg_img.setTexture(bg_texture);
   if(!Font.loadFromFile("../assets/gfx/HussarBold.otf")) {
     std::cerr << "Failed to load font. Exiting...\n";
     exit(1);
@@ -94,23 +100,34 @@ int Menu::menu_loop(sf::RenderWindow& w) {
   return -1;
 }
 
-PauseMenu::PauseMenu() {
+PauseMenu::PauseMenu(bool& is_muted_game) {
   if(!(font.loadFromFile("../assets/gfx/dynapuff.ttf"))) {
     std::cerr << "Error loading font. Exiting...\n";
     exit(1);
   }
   set_button(continue_btn, "Continue game", font);
-  continue_btn.setPosition(250, 250);
+  continue_btn.setPosition(250, 200);
+
+  set_button(restart_btn, "Restart level", font);
+  restart_btn.setPosition(260,250);
+
+  if (is_muted_game)
+    set_button(mute_btn, "Audio: OFF", font);
+  else 
+    set_button(mute_btn, "Audio: ON", font);
+  mute_btn.setPosition(300, 300);
 
   set_button(quit_btn, "Quit game", font);
-  quit_btn.setPosition(300, 300);
+  quit_btn.setPosition(290, 350);
   selectButton(&continue_btn); 
-  options_list = {&continue_btn, &quit_btn};
+  options_list = {&continue_btn, &restart_btn, &mute_btn, &quit_btn};
 }
 
 void PauseMenu::draw_menu(sf::RenderWindow& w) {
   w.clear();
   w.draw(continue_btn);
+  w.draw(restart_btn);
+  w.draw(mute_btn);
   w.draw(quit_btn);
   w.display();
 }
@@ -133,10 +150,28 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
       selectButton(options_list.at(selected_opt));
     }
 
+    bool pressed_Z_K = (event.type == sf::Event::KeyReleased && event.key.code == Z_K);
     switch(selected_opt) {
       case Continue:
-        if(event.type == sf::Event::KeyReleased && event.key.code == Z_K)
+        if(pressed_Z_K)
           return 1;
+        break;
+
+      case Restart:
+        if(pressed_Z_K)
+          return 2;
+        break;
+
+      case Mute:
+        if(pressed_Z_K) {
+          if (mute_btn.getString() == "Audio: OFF") {
+            mute_btn.setString("Audio: ON");
+            return 3;
+          } else {  
+            mute_btn.setString("Audio: OFF");
+            return 4;
+          }
+        }
         break;
 
       case Quit:

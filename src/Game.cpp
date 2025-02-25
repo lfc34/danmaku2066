@@ -5,9 +5,6 @@ window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
   window.setMouseCursorVisible(false);
-  std::clog << "Window initialised\n";
-  std::clog << "Sound manager initialized\n";
-  std::clog << "Game instance created\n";
 }
 
 int Game::menuLoop() {   
@@ -38,17 +35,36 @@ int Game::menuLoop() {
 }
 
 void Game::game_pause() {
-  constexpr bool Continue {1};
-  PauseMenu pm;
-  while (window.isOpen()) {
+  enum PauseReturn {
+    Continue = 1,
+    Restart = 2,
+    Unmute,
+    Mute
+  };
+  PauseMenu pm(IS_GAME_MUTED);
+  bool paused = true;
+  while (window.isOpen() && paused) {
     pm.draw_menu(window);
-    if(pm.menu_loop(window) == Continue) {
-      break;
+    switch (pm.menu_loop(window)) {
+      case Continue:
+        paused = false;
+        break;
+
+      case Unmute:
+        IS_GAME_MUTED = false;
+        break;
+
+      case Mute: 
+        IS_GAME_MUTED = true;
+        break;
+
+      case Restart:
+        lvl1Loop();
+        break;
     }
   }
 }
 
-// better be refactored into another class
 void Game::game_over(sf::Font& font, unsigned int& score) {
   using namespace Controls;
   
@@ -180,6 +196,13 @@ void Game::lvl1Loop() {
 
   // ====== GAME LOOP ====== //
   while(window.isOpen()) {
+
+    // to make mute audio button work
+    if (IS_GAME_MUTED)
+      SndMgr.is_muted = true;
+    else  
+      SndMgr.is_muted = false;
+
     //clear window at the start of each frame
     window.clear();
     
