@@ -14,6 +14,7 @@
 #include <SFML/System/Clock.hpp>
 
 #include "Projectile.h"
+#include "Sound.h"
 
 /** Defines enemy movement pattern in 3-point system.
     Initializes as curve line pattern by default */
@@ -56,7 +57,7 @@ public:
   
   /** @brief increases player score on current level
   *   @param takes reference to a current level score */
-	virtual void updateEnemy(const float& delta) = 0;
+	virtual void updateEnemy(const float& delta, SoundManager& smg) = 0;
   virtual void enemyShoot() = 0;
   virtual void enemy_move(const float& delta) = 0;
   
@@ -68,7 +69,7 @@ public:
   ~Enemy();
 };
 
-class MoonStone : public Enemy {
+class Fairy : public Enemy {
 private:
   const float FallingSpeed = 1.2f;
   unsigned int hp = 4;
@@ -78,8 +79,8 @@ public:
       @param player projectile vector reference to check collision with player
       bullets, enemy projectile vector reference to shoot, struct that
       defines move pattern for enemy*/
-  MoonStone(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
-	void updateEnemy(const float& delta) override;
+  Fairy(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
+	void updateEnemy(const float& delta, SoundManager& smg) override;
   void enemyShoot() override;
   void enemy_move(const float& delta) override;
 };
@@ -91,7 +92,7 @@ private:
 public:
   LizardKiller(EnemyData& dt, MovePattern pattern, 
                const sf::Vector2f& spawn_pos);
-	void updateEnemy(const float& delta) override;
+	void updateEnemy(const float& delta, SoundManager& smg) override;
   void enemyShoot() override;
   void enemy_move(const float& delta) override;
 };
