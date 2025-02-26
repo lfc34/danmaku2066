@@ -87,7 +87,7 @@ public:
 class LizardKiller : public Enemy {
 private:
   const float speed = 0.5f;
-  unsigned int hp = 8;
+  unsigned int hp = 40;
 public:
   LizardKiller(EnemyData& dt, MovePattern pattern, 
                const sf::Vector2f& spawn_pos);

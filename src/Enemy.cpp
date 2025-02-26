@@ -84,13 +84,29 @@ LizardKiller::LizardKiller(EnemyData& dt, MovePattern pattern,
 }
 
 void LizardKiller::enemyShoot() {
-
+  if (ShootTimer.getElapsedTime().asMilliseconds() >= 100) {
+    enm_prj_vec_ptr->push_back(std::make_unique<Pebble>
+                      (EnemySprite.getPosition()));
+    ShootTimer.restart();
+  }
 }
 
 void LizardKiller::enemy_move(const float& delta) {
-  EnemySprite.move(delta * speed * current_direction); 
+  if(EnemySprite.getPosition().y >= path.mid_point.y)
+    current_direction = path.end_point;
+  EnemySprite.move(current_direction * speed * delta);
 }
 
 void LizardKiller::updateEnemy(const float& delta) {
+  for(const auto& i : *plr_prj_vec_ptr) {
+    if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+      this->hp--;
+  }
+  if(this->hp == 0)
+    state = DEAD;
+  if(getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
+    state = FLEW_AWAY;
+
+  enemyShoot();
   enemy_move(delta);
 }
