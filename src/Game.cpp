@@ -1,4 +1,6 @@
 #include "Game.h"
+#include <SFML/System/Vector2.hpp>
+#include <memory>
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -190,15 +192,24 @@ void Game::lvl1Loop() {
   [[maybe_unused]]int currentWave {0};
 
   // Number of enemies for every wave
-  int enemies_in_wave[2] = {10, 10};
+  int enemies_in_wave[4] = {10, 10, 3, 3};
   std::vector<MovePattern> directions;
+
   MovePattern wave1 {}; 
-  directions.push_back(wave1);
+
   MovePattern wave2 {
     sf::Vector2f (800, 0),
     sf::Vector2f (-200, 200),
     sf::Vector2f (-400, -100)
   };
+
+  MovePattern wave3 {
+    sf::Vector2f (0, 0),
+    sf::Vector2f (0, 100),
+    sf::Vector2f (0, -100)
+  };
+
+  MovePattern wave4 = wave3;
   //=========================WAVE SPECIFIC DATA==============================//
 
   // ====== GAME LOOP ====== //
@@ -277,6 +288,24 @@ void Game::lvl1Loop() {
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
         }
+      }
+    }
+
+    // wave 3
+    if (time_wave > 13) {
+      for (int i = enemies_in_wave[2]; i > 0; --i) {
+        enemy_vec.emplace_back(std::make_unique<LizardKiller>
+                              (ptrs, wave3, sf::Vector2f ((150 * (float)i), 0)));
+        --enemies_in_wave[2];
+      }
+    }
+
+    // wave 4
+    if (time_wave > 18) {
+      for (int i = enemies_in_wave[3]; i > 0; --i) {
+        enemy_vec.emplace_back(std::make_unique<LizardKiller>
+                              (ptrs, wave4, sf::Vector2f ((150 * (float(i) + 1)), 0)));
+        --enemies_in_wave[3];
       }
     }
     
