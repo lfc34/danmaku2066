@@ -1,7 +1,7 @@
 #include "Projectile.h"
 
 bool Projectile::isFlewAway() {
-  return flewAway;
+  return (ProjShape.getPosition().y > 600);
 }
 
 const sf::Rect<float> Projectile::getProjBounds() {
@@ -18,17 +18,11 @@ Bullet::Bullet(sf::Vector2f ShootPos) {
 	ProjShape.setFillColor(sf::Color::Yellow);
 	ProjShape.setOrigin(1.75, 1.75); //center
 	ProjShape.setPosition(ShootPos);
-  flewAway = 0;
-  // std::clog << "Bullet spawned\n";
 }
 
 void Bullet::update(const float& delta) {
-  if (!flewAway)
+  if (!(isFlewAway()))
 	  ProjShape.move(0, Speed * delta);
-
-	// check if bullet flew away from screen here
-  if (ProjShape.getPosition().y < 0)
-    flewAway = true;
 }
 
 Pebble::Pebble(sf::Vector2f ShootPos) {
@@ -37,12 +31,22 @@ Pebble::Pebble(sf::Vector2f ShootPos) {
 	ProjShape.setFillColor(sf::Color::White);
 	ProjShape.setPosition(ShootPos);
 	ProjShape.setOrigin(2, 2);
-  flewAway = 0;
 }
 
 void Pebble::update(const float& delta) {
-  if (!flewAway)
+  if (!(isFlewAway()))
     ProjShape.move(0, Speed * delta);
-  if (ProjShape.getPosition().y > 600)
-    flewAway = true;
+}
+
+Fireball::Fireball(sf::Vector2f ShootPos, const float& x_direction) {
+  ProjShape.setRadius(12);
+  ProjShape.setFillColor(sf::Color::Yellow);
+  ProjShape.setPosition(ShootPos);
+  ProjShape.setOrigin(6, 6);
+  x_offset = x_direction;
+}
+
+void Fireball::update(const float& delta) {
+  if (!(isFlewAway()))
+    ProjShape.move(x_offset * delta, Speed * delta);
 }

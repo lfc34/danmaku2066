@@ -17,7 +17,6 @@
 class Projectile {
 protected:
   sf::CircleShape ProjShape;
-  bool flewAway;
 public:
   Projectile() = default;
   virtual void update(const float& delta) = 0;
@@ -42,6 +41,15 @@ private:
 
 public: 
   Pebble(sf::Vector2f ShootPos);
+  void update(const float& delta) override;
+};
+
+class Fireball : public Projectile {
+private:
+  const float Speed = 170.0f;
+  float x_offset {};
+public:
+  Fireball(sf::Vector2f ShootPos, const float& x_direction);
   void update(const float& delta) override;
 };
 
