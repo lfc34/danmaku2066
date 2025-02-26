@@ -23,6 +23,7 @@ private:
 
 	Sound BltSound;
 	Sound FairyDeath;
+  Sound LizardDeath;
   Sound PlayerHurt;
   Sound PlayerDead;
 
