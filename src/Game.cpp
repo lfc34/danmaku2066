@@ -271,7 +271,7 @@ void Game::lvl1Loop() {
     if (time_wave > 3) {
       for (int i = enemies_in_wave[0]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
-          enemy_vec.emplace_back(std::make_unique<MoonStone>
+          enemy_vec.emplace_back(std::make_unique<Fairy>
                                 (ptrs, wave1, wave1.spawn_pos));    
           --enemies_in_wave[0];
           enemy_spawn_timer.restart();
@@ -283,7 +283,7 @@ void Game::lvl1Loop() {
     if (time_wave > 8) {
       for (int i = enemies_in_wave[1]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
-          enemy_vec.emplace_back(std::make_unique<MoonStone>
+          enemy_vec.emplace_back(std::make_unique<Fairy>
                                 (ptrs, wave2, wave2.spawn_pos));
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
@@ -301,7 +301,7 @@ void Game::lvl1Loop() {
     }
 
     // wave 4
-    if (time_wave > 18) {
+    if (time_wave > 19) {
       for (int i = enemies_in_wave[3]; i > 0; --i) {
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
                               (ptrs, wave4, sf::Vector2f ((150 * (float(i) + 1)), 0)));
@@ -313,7 +313,6 @@ void Game::lvl1Loop() {
     for (auto& enemy : enemy_vec) {
       if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {
         enemy->send_to_valhalla(enemy->getSprite());
-        SndMgr.playSound("fairy_death");
         lvl_score += 10;
         // very expensive operation. Also all enemies blink
         // when one of them dies
@@ -326,7 +325,7 @@ void Game::lvl1Loop() {
         enemy_vec.shrink_to_fit();
         break;
       } else {
-        enemy->updateEnemy(delta);
+        enemy->updateEnemy(delta, SndMgr);
         window.draw(enemy->getSprite());
       }
     }
