@@ -1,5 +1,17 @@
 #include "Projectile.h"
 
+bool Projectile::isFlewAway() {
+  return flewAway;
+}
+
+const sf::Rect<float> Projectile::getProjBounds() {
+  return ProjShape.getGlobalBounds();
+}
+
+const sf::CircleShape& Projectile::getShape() {
+  return ProjShape;
+}
+
 Bullet::Bullet(sf::Vector2f ShootPos) {
   ProjShape.setRadius(3.0f);
 	ProjShape.setPointCount(3);
@@ -19,18 +31,6 @@ void Bullet::update(const float& delta) {
     flewAway = true;
 }
 
-bool Bullet::isFlewAway() {
-  return flewAway;
-}
-
-const sf::CircleShape& Bullet::getShape() {
-  return ProjShape;
-}
-
-const sf::Rect<float> Bullet::getProjBounds() {
-  return ProjShape.getGlobalBounds();
-}
-
 Pebble::Pebble(sf::Vector2f ShootPos) {
 	ProjShape.setRadius(4);
 	ProjShape.setPointCount(6);
@@ -45,16 +45,4 @@ void Pebble::update(const float& delta) {
     ProjShape.move(0, Speed * delta);
   if (ProjShape.getPosition().y > 600)
     flewAway = true;
-}
-
-bool Pebble::isFlewAway() {
-  return flewAway;
-}
-
-const sf::Rect<float> Pebble::getProjBounds() {
-  return ProjShape.getGlobalBounds();
-}
-
-const sf::CircleShape& Pebble::getShape() {
-  return ProjShape;
 }

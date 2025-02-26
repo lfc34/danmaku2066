@@ -15,40 +15,34 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 class Projectile {
+protected:
+  sf::CircleShape ProjShape;
+  bool flewAway;
 public:
   Projectile() = default;
   virtual void update(const float& delta) = 0;
-  virtual const sf::Rect<float> getProjBounds() = 0;
-  virtual const sf::CircleShape& getShape() = 0;
-  virtual bool isFlewAway() = 0;
+
+  const sf::Rect<float> getProjBounds();
+  const sf::CircleShape& getShape();
+  bool isFlewAway();
 };
 
 class Bullet : public Projectile {
 private:
 	const float Speed = -900.0f; // speed in px/sec
-	sf::CircleShape ProjShape;
-  bool flewAway;
 
 public: 	
 	Bullet(sf::Vector2f ShootPos);
-  bool isFlewAway() override;
-  const sf::Rect<float> getProjBounds() override;
 	void update(const float& delta) override;	
-  const sf::CircleShape& getShape() override;
 }; 
 
 class Pebble : public Projectile {
-	private: 
-		const float Speed = 300.0f;
-		sf::CircleShape ProjShape;
-    bool flewAway;
+private: 
+  const float Speed = 300.0f;
 
-	public: 
-		Pebble(sf::Vector2f ShootPos);
-    bool isFlewAway() override;
-    const sf::Rect<float> getProjBounds() override;
-    const sf::CircleShape& getShape() override;
-		void update(const float& delta) override;
+public: 
+  Pebble(sf::Vector2f ShootPos);
+  void update(const float& delta) override;
 };
 
 #endif
