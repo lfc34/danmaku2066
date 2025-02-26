@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <SFML/Graphics/Rect.hpp>
 #include <iostream>
 #include <memory>
 
@@ -55,7 +56,10 @@ public:
   sf::Clock PlayerShootTimer; 
 
   sf::Vector2f getPlayerPosition(); 
-  sf::Rect<float> getPlayerBounds(); 
+  /** Player hitbox is a bit smallet than player sprite and is
+      calculated independently
+      @return play hitbox rectangle */
+  sf::FloatRect getPlayerBounds(); 
 
   bool isMovingOutOfBnds();
   void move(float x, float y, const float& delta); 

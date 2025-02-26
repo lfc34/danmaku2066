@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "Sound.h"
+#include <SFML/Graphics/Rect.hpp>
+#include <asm-generic/errno.h>
 
 // to avoid writing sf::Keyboard::Key:Blahblah
 using namespace Controls; 
@@ -29,8 +31,10 @@ Player::Player(std::vector<std::unique_ptr<Projectile>>& pv,
   is_invuln = false;
 }
 
-sf::Rect<float> Player::getPlayerBounds() {
-  return PlayerSprite.getGlobalBounds();
+sf::FloatRect Player::getPlayerBounds() {
+  sf::Vector2f pos ((PlayerSprite.getGlobalBounds().getPosition().x + 15.0f),
+                    (PlayerSprite.getGlobalBounds().getPosition().y + 25.0f));
+  return sf::FloatRect (pos,PlayerSprite.getGlobalBounds().getSize()/3.0f);
 }
 
 sf::Vector2f Player::getPlayerPosition() {
