@@ -53,4 +53,12 @@ public:
   void update(const float& delta) override;
 };
 
+class Flameshard : public Projectile {
+private:
+  const float Speed = 333.0f;
+public:
+  Flameshard(sf::Vector2f ShootPos);
+  void update(const float& delta) override;
+};
+
 #endif

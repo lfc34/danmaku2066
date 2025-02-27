@@ -1,4 +1,5 @@
 #include "Projectile.h"
+#include <SFML/Graphics/Color.hpp>
 
 bool Projectile::isFlewAway() {
   return (ProjShape.getPosition().y > 600);
@@ -49,4 +50,20 @@ Fireball::Fireball(sf::Vector2f ShootPos, const float& x_direction) {
 void Fireball::update(const float& delta) {
   if (!(isFlewAway()))
     ProjShape.move(x_offset * delta, Speed * delta);
+}
+
+Flameshard::Flameshard(sf::Vector2f ShootPos) {
+  ProjShape.setRadius(5);
+  ProjShape.setFillColor(sf::Color::Yellow);
+  ProjShape.setOutlineThickness(2);
+  ProjShape.setOutlineColor(sf::Color::Red);
+  ProjShape.setPosition(ShootPos);
+  ProjShape.setOrigin(1.5, -2);
+}
+
+void Flameshard::update(const float& delta) {
+  if (!(isFlewAway())) {
+    ProjShape.move(0, delta * Speed);
+    ProjShape.rotate(10);
+  }
 }
