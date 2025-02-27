@@ -1,5 +1,5 @@
 #include "Game.h"
-#include <SFML/System/Vector2.hpp>
+#include "Enemy.h"
 #include <memory>
 
 Game::Game() : 
@@ -189,30 +189,28 @@ void Game::lvl1Loop() {
   
   //=========================WAVE SPECIFIC DATA==============================//
   // Wave index
-  [[maybe_unused]]int currentWave {0};
+  int currentWave {0};
 
   // Number of enemies for every wave
-  int enemies_in_wave[4] = {10, 10, 3, 3};
+  int enemies_in_wave[6] = {10, 10, 3, 3, 9, 14};
   std::vector<MovePattern> directions;
 
-  MovePattern wave1 {}; 
+  MovePattern curve {}; 
 
-  MovePattern wave2 {
+  MovePattern op_curve {
     sf::Vector2f (800, 0),
     sf::Vector2f (-200, 200),
     sf::Vector2f (-400, -100)
   };
 
-  MovePattern wave3 {
+  MovePattern march {
     sf::Vector2f (0, 0),
     sf::Vector2f (0, 100),
     sf::Vector2f (0, -100)
   };
-
-  MovePattern wave4 = wave3;
   //=========================WAVE SPECIFIC DATA==============================//
 
-  // ====== GAME LOOP ====== //
+    // ====== GAME LOOP ====== //
   while(window.isOpen()) {
 
     // to make mute audio button work
@@ -272,7 +270,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[0]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, wave1, wave1.spawn_pos));    
+                                (ptrs, curve, curve.spawn_pos));    
           --enemies_in_wave[0];
           enemy_spawn_timer.restart();
         }
@@ -284,7 +282,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[1]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, wave2, wave2.spawn_pos));
+                                (ptrs, op_curve, op_curve.spawn_pos));
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
         }
@@ -295,7 +293,7 @@ void Game::lvl1Loop() {
     if (time_wave > 13) {
       for (int i = enemies_in_wave[2]; i > 0; --i) {
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, wave3, sf::Vector2f ((150 * (float)i), 0)));
+                              (ptrs, march, sf::Vector2f ((150 * (float)i), 0)));
         --enemies_in_wave[2];
       }
     }
@@ -304,8 +302,34 @@ void Game::lvl1Loop() {
     if (time_wave > 19) {
       for (int i = enemies_in_wave[3]; i > 0; --i) {
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, wave4, sf::Vector2f ((150 * (float(i) + 1)), 0)));
+                              (ptrs, march, sf::Vector2f ((150 * (float(i) + 1)), 0)));
         --enemies_in_wave[3];
+      }
+    }
+
+    // in this wave they fall from the sky
+    // they are extremely fun with this rotation XD
+    // wave 5 
+    if (time_wave > 25) {
+      for (int i = enemies_in_wave[4]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 350) {
+          enemy_vec.emplace_back(std::make_unique<Skull>
+                                (ptrs, curve, curve.spawn_pos));
+          --enemies_in_wave[4];
+          enemy_spawn_timer.restart();
+        }
+      }
+    }
+
+    // wave 6
+    if (time_wave > 29) {
+      for (int i = enemies_in_wave[5]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 350) {
+          enemy_vec.emplace_back(std::make_unique<Skull>
+                                (ptrs, op_curve, op_curve.spawn_pos));
+          --enemies_in_wave[5];
+          enemy_spawn_timer.restart();
+        }
       }
     }
     
