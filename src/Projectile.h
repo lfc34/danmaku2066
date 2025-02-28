@@ -7,12 +7,17 @@
 
 #include <iostream>
 #include <vector>
+#include <random>
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+
+void accel_proj(float& speed, float accel);
+
+void slow_proj(float& speed, float slowdown);
 
 class Projectile {
 protected:
@@ -28,7 +33,7 @@ public:
 
 class Bullet : public Projectile {
 private:
-	const float Speed = -900.0f; // speed in px/sec
+	float Speed = -850.0f; // speed in px/sec
 
 public: 	
 	Bullet(sf::Vector2f ShootPos);
@@ -37,8 +42,7 @@ public:
 
 class Pebble : public Projectile {
 private: 
-  const float Speed = 300.0f;
-
+  float Speed = 300.0f;
 public: 
   Pebble(sf::Vector2f ShootPos);
   void update(const float& delta) override;
@@ -46,7 +50,7 @@ public:
 
 class Fireball : public Projectile {
 private:
-  const float Speed = 170.0f;
+  float Speed = 500.0f;
   float x_offset {};
 public:
   Fireball(sf::Vector2f ShootPos, const float& x_direction);
@@ -55,7 +59,7 @@ public:
 
 class Flameshard : public Projectile {
 private:
-  const float Speed = 333.0f;
+  float Speed = 333.0f;
 public:
   Flameshard(sf::Vector2f ShootPos);
   void update(const float& delta) override;
