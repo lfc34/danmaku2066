@@ -24,7 +24,7 @@ class Player {
 private:
   sf::Texture PlayerTexture;
   sf::Sprite PlayerSprite;
-  const float PlayerSpeed = 300.0f;
+  const float PlayerSpeed = 320.0f;
   // precisely calculated lmao
   const float DiagSlowdown = 1.414213f; 
   const float StartPosX = 400;
@@ -42,7 +42,7 @@ private:
   std::vector<std::unique_ptr<Enemy>>* enemies_vec_ptr;
 
 public:
-  unsigned int lives = 3;
+  int lives = 3;
   void loadPlayerModel();
   void placeStartPos();
   Player(std::vector<std::unique_ptr<Projectile>>& pv,
