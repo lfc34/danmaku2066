@@ -1,6 +1,4 @@
 #include "Enemy.h"
-#include "Projectile.h"
-#include "Sound.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // ENEMY
@@ -18,7 +16,7 @@ sf::Sprite& Enemy::getSprite() {
   return EnemySprite;
 }
 
-unsigned int& Enemy::getHp() {
+int& Enemy::getHp() {
   return this->hp;
 }
 
@@ -61,7 +59,7 @@ void Fairy::updateEnemy(const float& delta, SoundManager& smg) {
     if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
       this->hp--;
   }
-  if(this->hp == 0) {
+  if(this->hp <= 0) {
     smg.playSound("fairy_death");
     state = DEAD;
   }
@@ -72,7 +70,7 @@ void Fairy::updateEnemy(const float& delta, SoundManager& smg) {
 }
 
 void Fairy::enemyShoot() {
-  if (ShootTimer.getElapsedTime().asMilliseconds() >= 200) {
+  if (ShootTimer.getElapsedTime().asMilliseconds() >= (rand() % 300 + 50)) {
     enm_prj_vec_ptr->push_back(std::make_unique<Pebble>
                       (EnemySprite.getPosition()));
     ShootTimer.restart();
@@ -107,7 +105,7 @@ void LizardKiller::enemyShoot() {
                          (EnemySprite.getPosition().y + 60.0f));
   sf::Vector2f right_arm ((EnemySprite.getPosition().x + 75.0f),
                           (EnemySprite.getPosition().y + 60.0f));
-  if (ShootTimer.getElapsedTime().asMilliseconds() >= 600) {
+  if (ShootTimer.getElapsedTime().asMilliseconds() >= (rand() % 600 + 350)) {
     enm_prj_vec_ptr->push_back(std::make_unique<Fireball>
                       (right_arm, 30));
     enm_prj_vec_ptr->push_back(std::make_unique<Fireball>
@@ -121,7 +119,7 @@ void LizardKiller::updateEnemy(const float& delta, SoundManager& smg) {
     if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
       this->hp--;
   }
-  if(this->hp == 0) {
+  if(this->hp <= 0) {
     smg.playSound("lizard_death");
     state = DEAD;
   }
@@ -156,7 +154,7 @@ void Skull::increase_score(unsigned int& score) {
 }
 
 void Skull::enemyShoot() {
- if (ShootTimer.getElapsedTime().asMilliseconds() >= 200) {
+ if (ShootTimer.getElapsedTime().asMilliseconds() >= (rand() % 200 + 100)) {
     enm_prj_vec_ptr->push_back(std::make_unique<Flameshard>
                       (EnemySprite.getPosition()));
     ShootTimer.restart();
@@ -168,7 +166,7 @@ void Skull::updateEnemy(const float& delta, SoundManager& smg) {
     if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
       this->hp--;
   }
-  if(this->hp == 0) {
+  if(this->hp <= 0) {
     smg.playSound("lizard_death");
     state = DEAD;
   }
@@ -178,4 +176,13 @@ void Skull::updateEnemy(const float& delta, SoundManager& smg) {
   EnemySprite.rotate(10);
   enemyShoot();
   enemy_move(delta);
+}
+
+////////////////////////////////////////////////////////
+// BOSS
+
+Boss::Boss(EnemyData& dt) {
+  plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
+  enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
+
 }

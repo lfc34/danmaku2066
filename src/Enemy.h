@@ -1,11 +1,13 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#include <cwchar>
 #include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <memory>
 #include <cmath>
+#include <random>
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -20,10 +22,11 @@
     Initializes as curve line pattern by default */
 struct MovePattern {
   sf::Vector2f spawn_pos {0, 0};
-  sf::Vector2f mid_point {200, 200};
+  sf::Vector2f mid_point {200, 100};
   sf::Vector2f end_point {400, -100};
 };
 
+/** Contains pointers to all needed vectors */
 struct EnemyData {
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
@@ -39,7 +42,7 @@ protected:
 
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
-	unsigned int hp {};
+	int hp {};
 
   // This two variables below represent the state of enemy movement
   MovePattern path;
@@ -52,28 +55,22 @@ public:
     FLEW_AWAY
   };
   int state = ALIVE;
-  /* because otherwise you can get hit by enemy sprite which
-  *   hitbox left on the screen after death 
-  * @brief Sends enemy sprite out of playable screen
-  * @param sprite of any entity */
   
-  /** @brief increases player score on current level
-  *   @param takes reference to a current level score */
 	virtual void updateEnemy(const float& delta, SoundManager& smg) = 0;
   virtual void enemyShoot() = 0;
+  virtual void increase_score(unsigned int& score) = 0;
   
   void enemy_move(const float& delta);
-  virtual void increase_score(unsigned int& score) = 0;
   void send_to_valhalla(sf::Sprite& sprite);
+  int& getHp();
   sf::Rect<float> getBounds();
   sf::Sprite& getSprite();
-  unsigned int& getHp();
   ~Enemy();
 };
 
 class Fairy : public Enemy {
 private:
-  unsigned int hp = 4;
+  int hp = 4;
 public:
   /** @brief constructs an enemy, places him in start position
       and gives current moving direction
@@ -88,7 +85,7 @@ public:
 
 class LizardKiller : public Enemy {
 private:
-  unsigned int hp = 30;
+  int hp = 30;
 public:
   LizardKiller(EnemyData& dt, MovePattern pattern, 
                const sf::Vector2f& spawn_pos);
@@ -99,12 +96,34 @@ public:
 
 class Skull : public Enemy {
 private: 
-  unsigned int hp = 6;
+  int hp = 6;
 public:
   Skull(EnemyData& dt, MovePattern pattern, const sf::Vector2f spawn_pos);
   void increase_score(unsigned int& score) override;
   void updateEnemy(const float& delta, SoundManager& smg) override;
   void enemyShoot() override;
+};
+
+class Boss {
+private:
+  std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
+  std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
+  int hp = 600;
+  sf::Clock shoot_timer;
+  enum State {
+    Flying,
+    Shooting_PH1,
+    Shooting_PH2,
+    Idle,
+    Dying
+  };
+public: 
+  Boss(EnemyData& dt);
+  void trigger();
+  void move_left();
+  void move_right();
+  void boss_shoot(); 
+  int update_boss();
 };
 
 #endif
