@@ -12,6 +12,7 @@ namespace Controls {
     constexpr sf::Keyboard::Key X_K = sf::Keyboard::Key::X;
     constexpr sf::Keyboard::Key ESC = sf::Keyboard::Key::Escape;
     constexpr sf::Keyboard::Key SHIFT = sf::Keyboard::Key::LShift;
+    constexpr sf::Keyboard::Key RET = sf::Keyboard::Key::Enter;
 }
 
 #endif

@@ -1,6 +1,30 @@
 #include "Game.h"
 #include "Enemy.h"
+#include <SFML/System/Vector2.hpp>
 #include <memory>
+
+// MOVE PATTERNS
+const MovePattern curve {}; 
+const MovePattern op_curve {
+  sf::Vector2f (800, 0),
+  sf::Vector2f (-200, 150),
+  sf::Vector2f (-400, -150)
+};
+const MovePattern march {
+  sf::Vector2f (0, 0),
+  sf::Vector2f (0, 100),
+  sf::Vector2f (0, -100)
+};
+const MovePattern lr_line {
+  sf::Vector2f (0, 50),
+  sf::Vector2f (0,50),
+  sf::Vector2f (200, 50)
+};
+const MovePattern rl_line {
+  sf::Vector2f (800, 50),
+  sf::Vector2f (800, 40),
+  sf::Vector2f (-200, 50)
+};
 
 Game::Game() : 
 window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
@@ -115,12 +139,12 @@ void Game::game_over(sf::Font& font, unsigned int& score) {
       }
       switch (option) {
         case Restart:
-          if (event.type == sf::Event::KeyReleased && event.key.code == Z_K)
+          if (event.type == sf::Event::KeyReleased && event.key.code == RET)
             lvl1Loop();
           break;
 
         case Quit:
-          if (event.type == sf::Event::KeyReleased && event.key.code == Z_K) 
+          if (event.type == sf::Event::KeyReleased && event.key.code == RET) 
             exit(1);
           break;
       }
@@ -187,28 +211,8 @@ void Game::lvl1Loop() {
 
   lvl1.playMusic(IS_GAME_MUTED);
   
-  //=========================WAVE SPECIFIC DATA==============================//
-  // Wave index
-  int currentWave {0};
-
   // Number of enemies for every wave
-  int enemies_in_wave[6] = {10, 10, 3, 3, 9, 14};
-  std::vector<MovePattern> directions;
-
-  MovePattern curve {}; 
-
-  MovePattern op_curve {
-    sf::Vector2f (800, 0),
-    sf::Vector2f (-200, 200),
-    sf::Vector2f (-400, -100)
-  };
-
-  MovePattern march {
-    sf::Vector2f (0, 0),
-    sf::Vector2f (0, 100),
-    sf::Vector2f (0, -100)
-  };
-  //=========================WAVE SPECIFIC DATA==============================//
+  int enemies_in_wave[8] = {10, 10, 5, 5, 9, 14, 15, 15};
 
     // ====== GAME LOOP ====== //
   while(window.isOpen()) {
@@ -292,8 +296,12 @@ void Game::lvl1Loop() {
     // wave 3
     if (time_wave > 13) {
       for (int i = enemies_in_wave[2]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
+          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, rl_line, rl_line.spawn_pos));
+          enemy_spawn_timer.restart();
+        }
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, march, sf::Vector2f ((150 * (float)i), 0)));
+                              (ptrs, march, sf::Vector2f ((100 * (float)i + 1), 0)));
         --enemies_in_wave[2];
       }
     }
@@ -301,14 +309,18 @@ void Game::lvl1Loop() {
     // wave 4
     if (time_wave > 19) {
       for (int i = enemies_in_wave[3]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
+          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, lr_line, lr_line.spawn_pos));
+          enemy_spawn_timer.restart();
+        }
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, march, sf::Vector2f ((150 * (float(i) + 1)), 0)));
+                              (ptrs, march, sf::Vector2f ((100 * (float(i) + 2)), 0)));
         --enemies_in_wave[3];
       }
     }
 
-    // in this wave they fall from the sky
-    // they are extremely fun with this rotation XD
+    // Dialogue here: This forest is loose...
+    // Skull:: prepare to die
     // wave 5 
     if (time_wave > 25) {
       for (int i = enemies_in_wave[4]; i > 0; --i) {
@@ -333,6 +345,33 @@ void Game::lvl1Loop() {
       }
     }
     
+    // wave 7
+    if (time_wave > 36) {
+      for (int i = enemies_in_wave[6]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
+          enemy_vec.emplace_back(std::make_unique<Fairy>
+                                (ptrs, lr_line, lr_line.spawn_pos));
+          --enemies_in_wave[6];
+          enemy_spawn_timer.restart();
+        }
+      }
+    }
+
+    // wave 8
+    if (time_wave > 41) {
+      for (int i = enemies_in_wave[7]; i > 0; --i) {
+        if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
+          enemy_vec.emplace_back(std::make_unique<Fairy>
+                                (ptrs, rl_line, rl_line.spawn_pos));
+          --enemies_in_wave[7];
+          enemy_spawn_timer.restart();
+        }
+      }
+    }
+
+    // FINAL BOSS LVL1
+
+
     // ENEMY UPDATE LOOP
     for (auto& enemy : enemy_vec) {
       if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {

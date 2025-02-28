@@ -18,6 +18,7 @@
 #include <memory>
 #include <random>
 #include <new>
+#include <random>
 
 class Game {
 public:

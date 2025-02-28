@@ -72,7 +72,7 @@ int Menu::menu_loop(sf::RenderWindow& w) {
       selectButton(MenuButtons.at(SelectedOption));
     }
       
-    if (event.type == sf::Event::KeyReleased && event.key.code == Z_K) {
+    if (event.type == sf::Event::KeyReleased && event.key.code == RET) {
       switch (SelectedOption) {
         case Start:
           //this break menu loop and allows to play the game
@@ -150,20 +150,20 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
       selectButton(options_list.at(selected_opt));
     }
 
-    bool pressed_Z_K = (event.type == sf::Event::KeyReleased && event.key.code == Z_K);
+    bool pressed_ret = (event.type == sf::Event::KeyReleased && event.key.code == RET);
     switch(selected_opt) {
       case Continue:
-        if(pressed_Z_K)
+        if(pressed_ret)
           return 1;
         break;
 
       case Restart:
-        if(pressed_Z_K)
+        if(pressed_ret)
           return 2;
         break;
 
       case Mute:
-        if(pressed_Z_K) {
+        if(pressed_ret) {
           if (mute_btn.getString() == "Audio: OFF") {
             mute_btn.setString("Audio: ON");
             return 3;
@@ -175,7 +175,7 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
         break;
 
       case Quit:
-        if(event.type == sf::Event::KeyReleased && event.key.code == Z_K) {
+        if(pressed_ret) {
           std::clog << "game exit\n";
           exit(1);
         }
@@ -183,4 +183,18 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
     }
   }
   return 0;
+}
+
+Dialogue::Dialogue() {
+  if(!font.loadFromFile("../assets/gfx/dynapuff.ttf")) {
+    std::clog << "Failed to load font\n";
+    exit(1);
+  }
+  if(!frame_texture.loadFromFile("../assets/gfx/frame.png")) {
+    std::clog << "Failed to load frame bg\n";
+    exit(1);
+  }
+  frame.setTexture(frame_texture);
+  frame.setPosition(0, 400);
+
 }

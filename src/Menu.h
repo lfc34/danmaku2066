@@ -70,4 +70,20 @@ public:
   int menu_loop(sf::RenderWindow& w);
 };
 
+class Dialogue {
+private:
+  sf::Font font;
+  sf::Texture frame_texture;
+  sf::Sprite frame;
+  sf::Text char_name[2];
+  sf::Text frame_text;
+public:
+  enum DialogueState {
+    IN_DIALOGUE,
+    DIALOGUE_END
+  };
+  Dialogue();
+  int dialogue_loop(sf::RenderWindow& w);
+};
+
 #endif
