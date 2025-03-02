@@ -7,15 +7,17 @@ set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
 
 # where is the target environment
-set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32 ~/projects/danmaku2066/win32/SFML-2.6.2)
-set(GODPLS win32/SFML-2.6.2/lib)
-set(OPENAL_INCLUDE_DIR ${GODPLS}) 
-set(VORBIS_INCLUDE_DIR ${GODPLS})
-set(OGG_INCLUDE_DIR  ${GODPLS})
-set(FLAC_INCLUDE_DIR  ${GODPLS})
+set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32 ~/projects/danmaku2066/win32/SFML)
 
 # search for programs in the build host directories
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 # for libraries and headers in the target directories
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+# set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib" ".dll")
+
+set(SFML_INCLUDE_DIR "win32/SFML/include")
+include_directories(win32/SFML/include)
+set(SFML_LIBRARY_DIR "win32/SFML/lib")
+link_directories(win32/SFML/lib)
+set(SFML_DIR "win32/SFML/lib/cmake/SFML")

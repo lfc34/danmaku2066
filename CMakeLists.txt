@@ -5,10 +5,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 #debug
-set(CMAKE_CXX_FLAGS "-ggdb -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror")
+#set(CMAKE_CXX_FLAGS "-ggdb -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror")
 
-#uncomment to build game with optimisation release
-#set(CMAKE_CXX_FLAGS "-O2 -DNDEBUG")
+#game with optimisation release
+set(CMAKE_CXX_FLAGS "-O2 -DNDEBUG")
 
 include(FetchContent)
 FetchContent_Declare(SFML
