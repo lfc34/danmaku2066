@@ -13,7 +13,7 @@ void Player::loadPlayerModel() {
 
 void Player::placeStartPos() {
   PlayerSprite.setPosition(StartPosX, StartPosY);
-  std::clog << "Placed player at start position\n";
+  // std::clog << "Placed player at start position\n";
 }
 
 Player::Player(std::vector<std::unique_ptr<Projectile>>& pv,
@@ -98,8 +98,6 @@ void Player::input_handler(sf::Keyboard& kb, const float& delta,
     }
   }
 
-  if(kb.isKeyPressed(X_K))
-    this->lives++;
   // movement vector
   float MoveX = 0.0f;
   float MoveY = 0.0f;
