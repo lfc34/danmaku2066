@@ -10,6 +10,11 @@ int main() {
       std::this_thread::sleep_for(std::chrono::seconds(1));
       game.lvl1Loop();
       break;
+
+    case 1:
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+      game.survival_loop();
+      break;
     
     case -1:
       std::clog << "Game exit\n";

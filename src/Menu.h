@@ -36,6 +36,7 @@ private:
 public:
   enum MenuReturn {
     START_GAME,
+    SURVIVAL,
     MUTE_AUDIO,
     UNMUTE_AUDIO,
     QUIT

@@ -1,6 +1,4 @@
 #include "Menu.h"
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Window/Keyboard.hpp>
 
 using namespace Controls;
 
@@ -77,6 +75,10 @@ int Menu::menu_loop(sf::RenderWindow& w) {
         case Start:
           //this break menu loop and allows to play the game
           return START_GAME;
+          break;
+
+        case Survival:
+          return SURVIVAL;
           break;
 
         case Mute:
