@@ -1,5 +1,12 @@
 #include "Enemy.h"
 
+void load_texture(sf::Texture& texture, const char* path) {
+  if (!texture.loadFromFile(path)) {
+    std::cerr << "Failed to load " << path << ". Exiting...\n";
+    exit(1);
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // ENEMY
 void Enemy::enemy_move(const float& delta) {
@@ -184,5 +191,117 @@ void Skull::updateEnemy(const float& delta, SoundManager& smg) {
 Boss::Boss(EnemyData& dt) {
   plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
   enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
+  load_texture(boss_idle, "../assets/gfx/b_idle.png");
+  load_texture(boss_flying, "../assets/gfx/b_fly.png");
+  load_texture(boss_shooting, "../assets/gfx/b_atk.png");
+  boss_sprite.setTexture(boss_idle);
+  
+  // let him sit out of screen until trigger() is called
+  boss_sprite.setPosition(350, -250);
+}
 
+sf::Sprite& Boss::get_sprite() {
+  return boss_sprite;
+}
+
+void Boss::trigger() {
+  shoot_timer.restart();
+  boss_sprite.setPosition(350, 45);
+  triggered = true;
+}
+
+void Boss::move(const float& delta, const float x_offset) {
+  if (state == Flying) {
+    boss_sprite.setTexture(boss_flying);
+    boss_sprite.move(x_offset * delta, 0);
+  }
+}
+
+void Boss::boss_shoot() {
+  boss_sprite.setTexture(boss_shooting);
+  switch (state) {
+    case Shooting_PH1:
+      if (shoot_timer.getElapsedTime().asMilliseconds() > 100) {
+        for (int i = 800; i > 0; i-=100) {
+          enm_prj_vec_ptr->emplace_back(std::make_unique<Flameshard>
+                                       (sf::Vector2f(float(rand()%i+50),0)));
+          
+          shoot_timer.restart();
+        }
+      }
+      break;
+
+    case Shooting_PH2:
+      if (shoot_timer.getElapsedTime().asMilliseconds() > 450) {
+        for (int i = 800; i > 0; i-=150) {
+          enm_prj_vec_ptr->emplace_back(std::make_unique<Fireball>
+                                       (sf::Vector2f(float(i),0), float(rand()%100)));
+          shoot_timer.restart();
+        }
+      }
+      break;
+
+    case Shooting_PH3:
+      if (shoot_timer.getElapsedTime().asMilliseconds() > 200) {
+        for (int i = 800; i > 0; i-=70) {
+          enm_prj_vec_ptr->emplace_back(std::make_unique<Pebble>
+                                       (sf::Vector2f(float(rand()%i+300), 0)));
+          shoot_timer.restart();
+        }
+      }
+  }
+}
+
+int Boss::update_boss(const float& delta, float& phase_timer) {
+  boss_sprite.setTexture(boss_idle);
+  for(const auto& i : *plr_prj_vec_ptr) {
+    if(boss_sprite.getGlobalBounds().intersects(i->getProjBounds()))
+      this->hp--;
+  }
+
+  if (!(state == Flying))
+    boss_shoot();
+
+  if (hp <= 0) {
+    state = Dying;
+    return 1;
+  }
+  
+  if (phase_timer > 52) {
+    state = Shooting_PH1;
+  }
+  if (phase_timer > 54 && move_stage == 0) {
+    state = Flying;
+    if (boss_sprite.getPosition().x > 100)
+      move(delta, -200);
+    else if (boss_sprite.getPosition().x <= 100)
+      ++move_stage;
+  }
+  if (phase_timer > 56) {
+    state = Shooting_PH2;
+  }
+  if (phase_timer > 60 && move_stage == 1) {
+    state = Flying;
+    if (boss_sprite.getPosition().x < 600)
+      move(delta, 200);
+    else if (boss_sprite.getPosition().x >= 600)
+      ++move_stage;
+  }
+  if (phase_timer > 63) {
+    state = Shooting_PH3;
+  }
+  if (phase_timer > 67 && move_stage == 2) {
+    state = Flying;
+    if (boss_sprite.getPosition().x > 350)
+      move(delta, -200);
+    else if (boss_sprite.getPosition().x <= 300)
+      ++move_stage;
+  }
+  if (phase_timer > 69) {
+    state = Shooting_PH1;
+  }
+  if (phase_timer > 73) {
+    phase_timer = 51;
+  }
+  return 0;
 }

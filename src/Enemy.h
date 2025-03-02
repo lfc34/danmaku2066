@@ -22,8 +22,8 @@
     Initializes as curve line pattern by default */
 struct MovePattern {
   sf::Vector2f spawn_pos {0, 0};
-  sf::Vector2f mid_point {200, 100};
-  sf::Vector2f end_point {400, -100};
+  sf::Vector2f mid_point {200, 85};
+  sf::Vector2f end_point {600, -85};
 };
 
 /** Contains pointers to all needed vectors */
@@ -31,6 +31,8 @@ struct EnemyData {
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
 };
+
+void load_texture(sf::Texture& texture, const char* path);
 
 class Enemy {
 protected:
@@ -108,22 +110,35 @@ class Boss {
 private:
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
-  int hp = 600;
+  float speed = 250.0f;
+  
   sf::Clock shoot_timer;
+
+  sf::Texture boss_idle;
+  sf::Texture boss_flying;
+  sf::Texture boss_shooting;
+  sf::Sprite boss_sprite;
+
+  
+  int move_stage {};
+public: 
   enum State {
     Flying,
     Shooting_PH1,
     Shooting_PH2,
-    Idle,
+    Shooting_PH3,
     Dying
   };
-public: 
+  int state {};
+  int hp = 633;
+  bool triggered = false;
   Boss(EnemyData& dt);
+
+  sf::Sprite& get_sprite();
   void trigger();
-  void move_left();
-  void move_right();
+  void move(const float& delta, const float x_offset);
   void boss_shoot(); 
-  int update_boss();
+  int update_boss(const float& delta, float& phase_timer);
 };
 
 #endif
