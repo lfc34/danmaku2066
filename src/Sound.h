@@ -26,6 +26,7 @@ private:
   Sound LizardDeath;
   Sound PlayerHurt;
   Sound PlayerDead;
+	Sound GameWin;
 
 public:
   bool is_muted = false;

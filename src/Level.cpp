@@ -24,15 +24,33 @@ void Level::drawLevel(sf::RenderWindow& w) {
 		BgSprite.move(0, 0.2f); 
 }
 
-void Level::playMusic(bool is_muted)
-{
-  if (is_muted)
+void Level::load_boss_mus(const char* path) {
+	if(!(boss_music.openFromFile(path))) {
+		std::cerr << "Failed to load music. Exiting... \n";
+		exit(1);
+	}
+}
+
+void Level::play_boss_mus(bool is_muted) {
+	if (is_muted) {
+		boss_music.setVolume(0);
+	} else {
+		LvlMusic.stop();
+		boss_music.setVolume(MUSIC_VOLUME);
+		boss_music.play();
+	}
+}
+
+void Level::playMusic(bool is_muted) {
+  if (is_muted) {
     LvlMusic.setVolume(0);
-  else  
+	} else {
     LvlMusic.setVolume(MUSIC_VOLUME);
-	LvlMusic.play();
+		LvlMusic.play();
+	}
 }
 
 void Level::stop_music() {
 	LvlMusic.pause();
+	boss_music.pause();
 }

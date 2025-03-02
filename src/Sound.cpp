@@ -17,6 +17,7 @@ int SoundManager::loadSounds() {
   load_snd(LizardDeath, "../assets/sfx/lizard_death.ogg");
   load_snd(PlayerHurt, "../assets/sfx/plr_hurt.ogg");
   load_snd(PlayerDead, "../assets/sfx/plr_death.ogg");
+	load_snd(GameWin, "../assets/sfx/win.ogg");
 	// there will be more sounds later
 	return 0;
 }
@@ -42,6 +43,8 @@ void SoundManager::playSound(const std::string& Name) {
       PlayerHurt.snd.play();
     else if (Name == "player_death")
       PlayerDead.snd.play();
+		else if (Name == "game_win")
+			GameWin.snd.play();
   }
 }
 

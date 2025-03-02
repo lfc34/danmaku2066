@@ -14,6 +14,7 @@
 class Level {
 private:
 	sf::Music LvlMusic;
+	sf::Music boss_music;
 	sf::Texture BgTexture;
 	sf::Sprite BgSprite;
 	
@@ -25,6 +26,8 @@ public:
 	// TODO: in future the volume of music will be set in settings
 	void playMusic(bool is_muted);
 	void stop_music();
+	void load_boss_mus(const char* path);
+	void play_boss_mus(bool is_muted);
 };
 
 #endif
