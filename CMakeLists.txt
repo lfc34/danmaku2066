@@ -6,9 +6,14 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 #debug
 #set(CMAKE_CXX_FLAGS "-ggdb -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror")
+set(SFML_INCLUDE_DIR "win32/SFML/include")
+include_directories(win32/SFML/include)
+set(SFML_LIBRARY_DIR "win32/SFML/lib")
+link_directories(win32/SFML/lib)
+set(SFML_DIR "win32/SFML/lib/cmake/SFML")
 
 #game with optimisation release
-set(CMAKE_CXX_FLAGS "-O2 -DNDEBUG")
+set(CMAKE_CXX_FLAGS "-O2 -DNDEBUG -static-libgcc -static-libstdc++")
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -28,3 +33,11 @@ file(GLOB_RECURSE SOURCES
 add_executable(MuzhikDanmaku ${SOURCES})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-audio sfml-system)
+
+if(WIN32)
+    add_custom_command(
+        TARGET MuzhikDanmaku
+        COMMENT "Copy OpenAL DLL"
+        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:MuzhikDanmaku>
+        VERBATIM)
+endif()
