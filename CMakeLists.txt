@@ -6,11 +6,6 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 #debug
 #set(CMAKE_CXX_FLAGS "-ggdb -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror")
-set(SFML_INCLUDE_DIR "win32/SFML/include")
-include_directories(win32/SFML/include)
-set(SFML_LIBRARY_DIR "win32/SFML/lib")
-link_directories(win32/SFML/lib)
-set(SFML_DIR "win32/SFML/lib/cmake/SFML")
 
 #game with optimisation release
 set(CMAKE_CXX_FLAGS "-O2 -DNDEBUG -static-libgcc -static-libstdc++")
