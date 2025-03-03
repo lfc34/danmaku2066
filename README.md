@@ -1,13 +1,11 @@
 
 # Danmaku 2066
 
-This is a simple game built using SFML and C++.
+This is a simple shoot-em-up game built using SFML and C++. 
 
-# Obtaining game
+## Obtaining game
 
-## Download from releases
-
-Download game from releases
+Download it from [releases](https://github.com/lfc34/danmaku2066/releases/tag/danmaku2066) or build from source.
 
 ## Building from source
 
@@ -38,8 +36,7 @@ This will generete project files for your OS. On GNU/Linux simply run
   bin/MuzhikDanmaku
 ```
 
-> **Warning** building and running this game wasn't tested on MS Windows.  
-
 For Microsoft Windows it will build Visual Studio solutions (or MinGW, depends on what you pick), so refer to this [documentation (Visual Studio)](https://learn.microsoft.com/en-us/visualstudio/ide/building-and-cleaning-projects-and-solutions-in-visual-studio?view=vs-2022). 
 
-    
+## Game controls
+Use arrows to move around, Z to shoot, and Lshift to slowdown.
