@@ -42,7 +42,7 @@ private:
   std::vector<std::unique_ptr<Enemy>>* enemies_vec_ptr;
 
 public:
-  int lives = 3;
+  int lives = 100;
   void loadPlayerModel();
   void placeStartPos();
   Player(std::vector<std::unique_ptr<Projectile>>& pv,

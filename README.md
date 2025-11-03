@@ -30,7 +30,7 @@ Before building from source on linux, consider [this](https://www.sfml-dev.org/t
 ```bash
   cmake .. 
 ```
-This will generete project files for your OS. On GNU/Linux simply run 
+This will generate project files for your OS. On GNU/Linux simply run 
 ```bash
   make
   bin/MuzhikDanmaku
