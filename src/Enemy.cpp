@@ -1,4 +1,10 @@
-#include "Enemy.h"
+/// PORTED TO SFML3
+#include "Enemy.hpp"
+
+#include <iostream>
+
+// hack to suppres no default constructor error
+const sf::Texture dummy_texture;
 
 void load_texture(sf::Texture& texture, const char* path) {
   if (!texture.loadFromFile(path)) {
@@ -9,6 +15,11 @@ void load_texture(sf::Texture& texture, const char* path) {
 
 /////////////////////////////////////////////////////////////////////////////
 // ENEMY
+Enemy::Enemy()
+: EnemySprite(dummy_texture)
+{
+
+}
 void Enemy::enemy_move(const float& delta) {
   if(EnemySprite.getPosition().y >= path.mid_point.y)
     current_direction = path.end_point;
@@ -16,7 +27,7 @@ void Enemy::enemy_move(const float& delta) {
 }
 
 void Enemy::send_to_valhalla(sf::Sprite& sprite) {
-  sprite.setPosition(-800, -600);
+  sprite.setPosition({-800, -600});
 }
 
 sf::Sprite& Enemy::getSprite() {
@@ -48,9 +59,9 @@ Fairy::Fairy(EnemyData& dt, MovePattern pattern,
     std::cerr << "Failed to load enemy texture. Exiting...\n";
     exit(1);
   }
-  EnemySprite.setTexture(EnemyTexture);
+  EnemySprite.setTexture(EnemyTexture, true);
 	EnemySprite.setPosition(spawn_pos);
-	EnemySprite.setOrigin(30, 30);
+	EnemySprite.setOrigin({30, 30});
   path = pattern;
   current_direction = path.mid_point;
   state = ALIVE;
@@ -63,7 +74,7 @@ void Fairy::increase_score(unsigned int& score) {
 void Fairy::updateEnemy(const float& delta, SoundManager& smg) {
   // checks for enemy<->bullet collision
   for(const auto& i : *plr_prj_vec_ptr) {
-    if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+    if(EnemySprite.getGlobalBounds().findIntersection(i->getProjBounds()))
       this->hp--;
   }
   if(this->hp <= 0) {
@@ -96,7 +107,7 @@ LizardKiller::LizardKiller(EnemyData& dt, MovePattern pattern,
     std::cerr << "Failed to load enemy texture. Exiting...\n";
     exit(1);
   }
-  EnemySprite.setTexture(EnemyTexture);
+  EnemySprite.setTexture(EnemyTexture, true);
 	EnemySprite.setPosition(spawn_pos);
   path = pattern;
   current_direction = path.mid_point;
@@ -123,7 +134,7 @@ void LizardKiller::enemyShoot() {
 
 void LizardKiller::updateEnemy(const float& delta, SoundManager& smg) {
   for(const auto& i : *plr_prj_vec_ptr) {
-    if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+    if(EnemySprite.getGlobalBounds().findIntersection(i->getProjBounds()))
       this->hp--;
   }
   if(this->hp <= 0) {
@@ -149,7 +160,7 @@ Skull::Skull(EnemyData& dt, MovePattern pattern,
     std::cerr << "Failed to load enemy texture. Exiting...\n";
     exit(1);
   }
-  EnemySprite.setTexture(EnemyTexture);
+  EnemySprite.setTexture(EnemyTexture, true);
 	EnemySprite.setPosition(spawn_pos);
   path = pattern;
   current_direction = path.mid_point;
@@ -170,7 +181,7 @@ void Skull::enemyShoot() {
 
 void Skull::updateEnemy(const float& delta, SoundManager& smg) {
   for(const auto& i : *plr_prj_vec_ptr) {
-    if(EnemySprite.getGlobalBounds().intersects(i->getProjBounds()))
+    if(EnemySprite.getGlobalBounds().findIntersection(i->getProjBounds()))
       this->hp--;
   }
   if(this->hp <= 0) {
@@ -180,7 +191,7 @@ void Skull::updateEnemy(const float& delta, SoundManager& smg) {
   if(getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
     state = FLEW_AWAY;
 
-  EnemySprite.rotate(10);
+  EnemySprite.rotate(sf::degrees(10));
   enemyShoot();
   enemy_move(delta);
 }
@@ -188,16 +199,17 @@ void Skull::updateEnemy(const float& delta, SoundManager& smg) {
 ////////////////////////////////////////////////////////
 // BOSS
 
-Boss::Boss(EnemyData& dt) {
+Boss::Boss(EnemyData& dt)
+: boss_sprite(dummy_texture) {
   plr_prj_vec_ptr = dt.plr_prj_vec_ptr;
   enm_prj_vec_ptr = dt.enm_prj_vec_ptr;
   load_texture(boss_idle, "../assets/gfx/b_idle.png");
   load_texture(boss_flying, "../assets/gfx/b_fly.png");
   load_texture(boss_shooting, "../assets/gfx/b_atk.png");
-  boss_sprite.setTexture(boss_idle);
+  boss_sprite.setTexture(boss_idle, true);
   
   // let him sit out of screen until trigger() is called
-  boss_sprite.setPosition(350, -250);
+  boss_sprite.setPosition({350, -250});
 }
 
 sf::Sprite& Boss::get_sprite() {
@@ -206,19 +218,19 @@ sf::Sprite& Boss::get_sprite() {
 
 void Boss::trigger() {
   shoot_timer.restart();
-  boss_sprite.setPosition(350, 45);
+  boss_sprite.setPosition({350, 45});
   triggered = true;
 }
 
 void Boss::move(const float& delta, const float x_offset) {
   if (state == Flying) {
-    boss_sprite.setTexture(boss_flying);
-    boss_sprite.move(x_offset * delta, 0);
+    boss_sprite.setTexture(boss_flying, true);
+    boss_sprite.move({x_offset * delta, 0});
   }
 }
 
 void Boss::boss_shoot() {
-  boss_sprite.setTexture(boss_shooting);
+  boss_sprite.setTexture(boss_shooting, true);
   switch (state) {
     case Shooting_PH1:
       if (shoot_timer.getElapsedTime().asMilliseconds() > 100) {
@@ -253,9 +265,9 @@ void Boss::boss_shoot() {
 }
 
 int Boss::update_boss(const float& delta, float& phase_timer) {
-  boss_sprite.setTexture(boss_idle);
+  boss_sprite.setTexture(boss_idle, true);
   for(const auto& i : *plr_prj_vec_ptr) {
-    if(boss_sprite.getGlobalBounds().intersects(i->getProjBounds()))
+    if(boss_sprite.getGlobalBounds().findIntersection(i->getProjBounds()))
       this->hp--;
   }
 

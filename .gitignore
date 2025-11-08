@@ -37,3 +37,5 @@ win32/
 win32.cmake
 TODO
 compile_flags.txt
+.clangd
+.cache

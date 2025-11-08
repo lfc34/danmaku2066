@@ -33,10 +33,8 @@ Before building from source on linux, consider [this](https://www.sfml-dev.org/t
 This will generate project files for your OS. On GNU/Linux simply run 
 ```bash
   make
-  bin/MuzhikDanmaku
+  ./MuzhikDanmaku
 ```
-
-For Microsoft Windows it will build Visual Studio solutions (or MinGW, depends on what you pick), so refer to this [documentation (Visual Studio)](https://learn.microsoft.com/en-us/visualstudio/ide/building-and-cleaning-projects-and-solutions-in-visual-studio?view=vs-2022). 
 
 ## Game controls
 Use arrows to move around, Z to shoot, and Lshift to slowdown.

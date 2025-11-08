@@ -1,30 +1,24 @@
-#include "Game.h"
+/// PORTED TO SFML3 v
+#include "Game.hpp"
 
-// MOVE PATTERNS
-const MovePattern curve {}; 
-const MovePattern op_curve {
-  sf::Vector2f (800, 0),
-  sf::Vector2f (-200, 150),
-  sf::Vector2f (-400, -85)
-};
-const MovePattern march {
-  sf::Vector2f (0, 0),
-  sf::Vector2f (0, 100),
-  sf::Vector2f (0, -100)
-};
-const MovePattern lr_line {
-  sf::Vector2f (0, 50),
-  sf::Vector2f (0,50),
-  sf::Vector2f (200, 50)
-};
-const MovePattern rl_line {
-  sf::Vector2f (800, 50),
-  sf::Vector2f (800, 40),
-  sf::Vector2f (-200, 50)
-};
+#include <iostream>
+#include <map>
+#include <algorithm>
+
+#include "Defaults.hpp"
+#include "Menu.hpp"
+#include "Controls.hpp"
+#include "Projectile.hpp"
+#include "Enemy.hpp"
+#include "Level.hpp"
+#include "Player.hpp"
+
+bool Game::init_window() {
+  return false; 
+}
 
 Game::Game() : 
-window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Muzhik 2066") {
+window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Muzhik 2066") {
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
   window.setMouseCursorVisible(false);
@@ -94,21 +88,21 @@ void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
   }
 }
 
-void Game::game_over(sf::Font& font, int& score) {
+void Game::game_over(const sf::Font& font, int& score) {
   using namespace Controls;
   
-  sf::Text game_over("Game over!", font, 50);  
-  game_over.setPosition(260, 120);
+  sf::Text game_over(font, "Game over!", 50);  
+  game_over.setPosition({260, 120});
 
-  sf::Text restart_btn("Restart", font, 35);
-  restart_btn.setPosition(330, 300);
+  sf::Text restart_btn(font, "Restart", 35);
+  restart_btn.setPosition({330, 300});
   restart_btn.setFillColor(sf::Color::Green);
 
-  sf::Text quit_game_btn("Quit game", font, 35);
-  quit_game_btn.setPosition(310, 340);
+  sf::Text quit_game_btn(font, "Quit game", 35);
+  quit_game_btn.setPosition({310, 340});
 
-  sf::Text final_score("Score: " + std::to_string(score), font, 40);
-  final_score.setPosition(310, 180);
+  sf::Text final_score(font, "Score: " + std::to_string(score), 40);
+  final_score.setPosition({310, 180});
   final_score.setFillColor(sf::Color::Red);
 
   std::vector<sf::Text*> options_list {&restart_btn, &quit_game_btn};
@@ -119,18 +113,18 @@ void Game::game_over(sf::Font& font, int& score) {
   };
 
   size_t option = Restart;
-  sf::Event event;
   while(window.isOpen()) {
     window.clear();
-    while(window.pollEvent(event)) {
-      if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+    while(const std::optional event = window.pollEvent()) {
+      auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
+      if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
         options_list.at(option)->setFillColor(sf::Color::White);
         if (option == Restart)
           option = Quit;
         else
           --option;
         options_list.at(option)->setFillColor(sf::Color::Green);
-      } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+      } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
         options_list.at(option)->setFillColor(sf::Color::White);
         ++option;
         if (option > Quit)
@@ -139,7 +133,7 @@ void Game::game_over(sf::Font& font, int& score) {
       }
       switch (option) {
         case Restart:
-          if (event.type == sf::Event::KeyReleased && event.key.code == RET) {
+          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) {
             if (game_mode == Game_Level)
               lvl1Loop();
             else  
@@ -148,7 +142,7 @@ void Game::game_over(sf::Font& font, int& score) {
           break;
 
         case Quit:
-          if (event.type == sf::Event::KeyReleased && event.key.code == RET) 
+          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) 
             exit(1);
           break;
       }
@@ -161,7 +155,7 @@ void Game::game_over(sf::Font& font, int& score) {
   }
 }
 
-void Game::win_screen(int& score, int& plr_lives, sf::Font& font) {
+void Game::win_screen(int& score, int& plr_lives, const sf::Font& font) {
   sf::Texture winbg_t;
   if(!(winbg_t.loadFromFile("../assets/gfx/winscreen.png"))) {
     std::cerr << "Failed to load win screen (lmao). Exiting...\n";
@@ -169,13 +163,10 @@ void Game::win_screen(int& score, int& plr_lives, sf::Font& font) {
   }
   sf::Sprite winbg(winbg_t);
   std::string f_score = std::to_string(plr_lives * score);
-  sf::Text final_score;
-  final_score.setFont(font);
-  final_score.setString(f_score);
-  final_score.setCharacterSize(50);
-  final_score.setPosition(60, 300);
+  sf::Text final_score(font, f_score, 50);
+  final_score.setPosition({60, 300});
   while (window.isOpen()) {
-    if (kb.isKeyPressed(sf::Keyboard::Key::M))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M))
       menuLoop();
     window.clear();
     window.draw(winbg);
@@ -184,24 +175,17 @@ void Game::win_screen(int& score, int& plr_lives, sf::Font& font) {
   }
 }
 
+// the "survival loop" MUST NOT load anything except its own DATA!!!
 void Game::survival_loop() {
   game_mode = Game_Survival;
   // UI for level
-  sf::Font UI_font;
-  // load UI font
-  if(!UI_font.loadFromFile("../assets/gfx/dynapuff.ttf")) {
-    std::cerr << "Failed to load assets/gfx/dynapuff.tff. Exiting...\n";
-    exit(1);
-  }
-  int lvl_score {};
-  sf::Text player_score(std::to_string(lvl_score), UI_font, 19);
-  player_score.setPosition(640, 570);
-  sf::Text player_lives;
-  player_lives.setFont(UI_font);
-  player_lives.setCharacterSize(19);
-  player_lives.setPosition(640, 550);
+  const sf::Font UI_font("../assets/gfx/dynapuff.ttf");
 
-  sf::Event event;
+  int lvl_score {};
+  sf::Text player_score(UI_font, std::to_string(lvl_score), 19);
+  player_score.setPosition({640, 570});
+  sf::Text player_lives(UI_font, "0", 19);
+  player_lives.setPosition({640, 550});
 
   // vectors to store projectiles and entities
   std::vector<std::unique_ptr<Projectile>> ProjVec {};
@@ -226,7 +210,7 @@ void Game::survival_loop() {
   float spawn_rand {};
   
   std::map<int, MovePattern> mp_map{
-    {0, curve}, 
+    {0, {}}, 
     {1, op_curve}, 
     {2, march}, 
     {3, lr_line},
@@ -258,7 +242,7 @@ void Game::survival_loop() {
     survival.drawLevel(window); 
 
     // player update + input handler
-    player->input_handler(kb, delta, SndMgr);
+    player->input_handler(delta, SndMgr);
     player->updatePlayer(window, SndMgr);
 
     // UI draw part
@@ -268,16 +252,17 @@ void Game::survival_loop() {
     window.draw(player_lives);
     
     // event processor
-    while(window.pollEvent(event)) {
+    while(const std::optional event = window.pollEvent()) {
+      const auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
       // closing window via cross on the panel
-      if(event.type == sf::Event::Closed) {
+      if(event->is<sf::Event::Closed>()) {
         window.close();
         break;
       }
       
       // game pause
-      if(event.type == sf::Event::KeyReleased 
-        && event.key.code == Controls::ESC) { 
+      if(event->is<sf::Event::KeyReleased>() 
+        && keyReleased->code == Controls::ESC) { 
         survival.stop_music();
 
         frame_clock.restart();
@@ -385,21 +370,13 @@ void Game::survival_loop() {
 void Game::lvl1Loop() {
   game_mode = Game_Level;
   // UI for level
-  sf::Font UI_font;
+  const sf::Font UI_font("../assets/gfx/dynapuff.ttf");
   // load UI font
-  if(!UI_font.loadFromFile("../assets/gfx/dynapuff.ttf")) {
-    std::cerr << "Failed to load assets/gfx/dynapuff.tff. Exiting...\n";
-    exit(1);
-  }
   int lvl_score {};
-  sf::Text player_score(std::to_string(lvl_score), UI_font, 19);
-  player_score.setPosition(640, 570);
-  sf::Text player_lives;
-  player_lives.setFont(UI_font);
-  player_lives.setCharacterSize(19);
-  player_lives.setPosition(640, 550);
-
-  sf::Event event;
+  sf::Text player_score(UI_font, std::to_string(lvl_score), 19);
+  player_score.setPosition({640, 570});
+  sf::Text player_lives(UI_font, "0", 19);
+  player_lives.setPosition({640, 550});
 
   // vectors to store projectiles and entities
   std::vector<std::unique_ptr<Projectile>> ProjVec {};
@@ -459,7 +436,7 @@ void Game::lvl1Loop() {
     lvl1.drawLevel(window); 
 
     // player update + input handler
-    player->input_handler(kb, delta, SndMgr);
+    player->input_handler(delta, SndMgr);
     player->updatePlayer(window, SndMgr);
 
     // UI draw part
@@ -469,24 +446,24 @@ void Game::lvl1Loop() {
     window.draw(player_lives);
     
     // event processor
-    while(window.pollEvent(event)) {
+    while(const std::optional event = window.pollEvent()) {
+      const auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
       // closing window via cross on the panel
-      if(event.type == sf::Event::Closed) {
+      if(event->is<sf::Event::Closed>()) {
         window.close();
         break;
       }
       
       // game pause
-      if(event.type == sf::Event::KeyReleased 
-        && event.key.code == Controls::ESC) { 
+      if(event->is<sf::Event::KeyReleased>() 
+        && keyReleased->code == Controls::ESC) { 
         lvl1.stop_music();
 
         frame_clock.restart();
-        game_pause(waveTimer, enemy_spawn_timer);
+        game_pause(frame_clock, frame_clock);
         // after continuing the gaem
         lvl1.playMusic(IS_GAME_MUTED);
         frame_clock.restart();
-        enemy_spawn_timer.restart();
       }
     }
 

@@ -1,6 +1,16 @@
-#include "Menu.h"
+/// PORTED TO SFML3
+#include "Menu.hpp"
+
+#include <iostream>
+
+#include "Controls.hpp"
 
 using namespace Controls;
+
+// hack to suppress "no default constructor error"
+const sf::Texture dummy_texture;
+const sf::Font dummy_font;
+const sf::Text dummy_text(dummy_font, "");
 
 void Menu::set_button(sf::Text& Btn, std::string s, sf::Font& font) {
   Btn.setFont(font);
@@ -28,14 +38,20 @@ void Menu::drawMenu(sf::RenderWindow& w) {
   w.display();
 }
 
-Menu::Menu() {
+Menu::Menu() 
+: bg_img(dummy_texture), 
+StartButton(dummy_text),
+SurvivalMode(dummy_text),
+Mute_Audio(dummy_text),
+QuitButton(dummy_text)
+{
   GameStarted = false;
   if(!bg_texture.loadFromFile("../assets/gfx/menu_bg.png")) {
-    std::cerr << "Failder to load menu bg image\n";
+    std::cerr << "Failed to load menu bg image\n";
     exit(1);
   }
-  bg_img.setTexture(bg_texture);
-  if(!Font.loadFromFile("../assets/gfx/HussarBold.otf")) {
+  bg_img.setTexture(bg_texture, true);
+  if(!Font.openFromFile("../assets/gfx/HussarBold.otf")) {
     std::cerr << "Failed to load font. Exiting...\n";
     exit(1);
   }
@@ -44,25 +60,25 @@ Menu::Menu() {
   set_button(Mute_Audio, "Audio: ON", Font);
   set_button(QuitButton, "Quit", Font);
 
-  StartButton.setPosition(340.0, 200.0); //somewhere in center for 800x600
-  SurvivalMode.setPosition(250.0, 250.0); // a bit below
-  Mute_Audio.setPosition(300.0, 300.0);
-  QuitButton.setPosition(350.0, 350.0);
+  StartButton.setPosition({340.0, 200.0}); //somewhere in center for 800x600
+  SurvivalMode.setPosition({250.0, 250.0}); // a bit below
+  Mute_Audio.setPosition({300.0, 300.0});
+  QuitButton.setPosition({350.0, 350.0});
   selectButton(&StartButton);
   SelectedOption = Start;
 }
 
 int Menu::menu_loop(sf::RenderWindow& w) {
-  sf::Event event;
-  while(w.pollEvent(event)) {
-    if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+  while(const std::optional event = w.pollEvent()) {
+    auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
       unselectButton(MenuButtons.at(SelectedOption));
       if (SelectedOption == Start) 
         SelectedOption = Quit;
       else  
         --SelectedOption; 
       selectButton(MenuButtons.at(SelectedOption));
-    } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
       unselectButton(MenuButtons.at(SelectedOption));
       ++SelectedOption;
       if (SelectedOption > Quit) 
@@ -70,7 +86,7 @@ int Menu::menu_loop(sf::RenderWindow& w) {
       selectButton(MenuButtons.at(SelectedOption));
     }
       
-    if (event.type == sf::Event::KeyReleased && event.key.code == RET) {
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) {
       switch (SelectedOption) {
         case Start:
           //this break menu loop and allows to play the game
@@ -102,25 +118,29 @@ int Menu::menu_loop(sf::RenderWindow& w) {
   return -1;
 }
 
-PauseMenu::PauseMenu(bool& is_muted_game) {
-  if(!(font.loadFromFile("../assets/gfx/dynapuff.ttf"))) {
+PauseMenu::PauseMenu(bool& is_muted_game)
+: continue_btn(dummy_text),
+  restart_btn(dummy_text),
+  mute_btn(dummy_text),
+  quit_btn(dummy_text) {
+  if(!(font.openFromFile("../assets/gfx/dynapuff.ttf"))) {
     std::cerr << "Error loading font. Exiting...\n";
     exit(1);
   }
   set_button(continue_btn, "Continue game", font);
-  continue_btn.setPosition(250, 200);
+  continue_btn.setPosition({250, 200});
 
   set_button(restart_btn, "Restart level", font);
-  restart_btn.setPosition(260,250);
+  restart_btn.setPosition({260,250});
 
   if (is_muted_game)
     set_button(mute_btn, "Audio: OFF", font);
   else 
     set_button(mute_btn, "Audio: ON", font);
-  mute_btn.setPosition(300, 300);
+  mute_btn.setPosition({300, 300});
 
   set_button(quit_btn, "Quit game", font);
-  quit_btn.setPosition(290, 350);
+  quit_btn.setPosition({290, 350});
   selectButton(&continue_btn); 
   options_list = {&continue_btn, &restart_btn, &mute_btn, &quit_btn};
 }
@@ -135,16 +155,16 @@ void PauseMenu::draw_menu(sf::RenderWindow& w) {
 }
 
 int PauseMenu::menu_loop(sf::RenderWindow& w) {
-  sf::Event event;
-  while (w.pollEvent(event)) {
-    if (event.type == sf::Event::KeyReleased && event.key.code == UP) {
+  while (const std::optional event = w.pollEvent()) {
+    auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
       unselectButton(options_list.at(selected_opt));
       if (selected_opt == Continue)
         selected_opt = Quit;
       else
        --selected_opt;
       selectButton(options_list.at(selected_opt));
-    } else if (event.type == sf::Event::KeyReleased && event.key.code == DOWN) {
+    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
       unselectButton(options_list.at(selected_opt));
       ++selected_opt;
       if (selected_opt > Quit)
@@ -152,7 +172,7 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
       selectButton(options_list.at(selected_opt));
     }
 
-    bool pressed_ret = (event.type == sf::Event::KeyReleased && event.key.code == RET);
+    bool pressed_ret = (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET);
     switch(selected_opt) {
       case Continue:
         if(pressed_ret)
@@ -187,16 +207,17 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
   return 0;
 }
 
-Dialogue::Dialogue() {
-  if(!font.loadFromFile("../assets/gfx/dynapuff.ttf")) {
-    std::clog << "Failed to load font\n";
-    exit(1);
-  }
-  if(!frame_texture.loadFromFile("../assets/gfx/frame.png")) {
-    std::clog << "Failed to load frame bg\n";
-    exit(1);
-  }
-  frame.setTexture(frame_texture);
-  frame.setPosition(0, 400);
+// Currently not present in game
+// Dialogue::Dialogue() {
+//   if(!font.openFromFile("../assets/gfx/dynapuff.ttf")) {
+//     std::clog << "Failed to load font\n";
+//     exit(1);
+//   }
+//   if(!frame_texture.loadFromFile("../assets/gfx/frame.png")) {
+//     std::clog << "Failed to load frame bg\n";
+//     exit(1);
+//   }
+//   frame.setTexture(frame_texture);
+//   frame.setPosition({0, 400});
 
-}
+// }
