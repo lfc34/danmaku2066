@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.28)
 project(MuzhikDanmaku LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# LOGGER SETUP
+option(ENABLE_LOGGER "Enable logger" ON)
+if (ENABLE_LOGGER) 
+    add_definitions(-DENABLE_LOGGER)
+endif()
+
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
