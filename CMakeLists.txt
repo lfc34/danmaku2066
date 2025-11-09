@@ -22,7 +22,6 @@ file(GLOB_RECURSE SOURCES
 )
 
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window Audio System)
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
 add_executable(MuzhikDanmaku ${SOURCES})
 target_include_directories(MuzhikDanmaku PRIVATE include)
