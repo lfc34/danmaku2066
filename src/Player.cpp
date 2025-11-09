@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#include "Controls.hpp"
-
 // hack to suppress sf::Sprite no default constructor error
 const sf::Texture dummy_texture;
 
@@ -95,9 +93,8 @@ void Player::fire(SoundManager& smg) {
 void Player::input_handler(const float& delta, 
                            SoundManager& smg) {
   using namespace sf::Keyboard;
-  using namespace Controls;
   // fire
-  if(isKeyPressed(Z_K)) {
+  if(isKeyPressed(Key::Z)) {
     if(PlayerShootTimer.getElapsedTime().asMilliseconds() >= 125) {
       fire(smg);
       PlayerShootTimer.restart();
@@ -108,17 +105,17 @@ void Player::input_handler(const float& delta,
   float MoveX = 0.0f;
   float MoveY = 0.0f;
   // vertical movement
-  if(isKeyPressed(UP)){
+  if(isKeyPressed(Key::Up)){
     MoveY -= PlayerSpeed;
   }
-  if(isKeyPressed(DOWN)) {
+  if(isKeyPressed(Key::Down)) {
     MoveY += PlayerSpeed;
   }
   // horizontal movement
-  if(isKeyPressed(LEFT)) {
+  if(isKeyPressed(Key::Left)) {
     MoveX -= PlayerSpeed;
   }
-  if(isKeyPressed(RIGHT)) {
+  if(isKeyPressed(Key::Right)) {
     MoveX += PlayerSpeed;
   }
 
@@ -129,7 +126,7 @@ void Player::input_handler(const float& delta,
   }
   
   // slow down player if LShift is pressed
-  if(isKeyPressed(SHIFT)) {
+  if(isKeyPressed(Key::LShift)) {
     MoveX /= 1.5f;
     MoveY /= 1.5f;
   }

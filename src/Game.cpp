@@ -4,54 +4,57 @@
 #include <iostream>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include "Defaults.hpp"
-#include "Menu.hpp"
-#include "Controls.hpp"
+#include "Interface.hpp"
+#include "Logger.hpp"
 #include "Projectile.hpp"
 #include "Enemy.hpp"
 #include "Level.hpp"
 #include "Player.hpp"
 
-bool Game::init_window() {
-  return false; 
-}
-
 Game::Game() : 
-window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Muzhik 2066") {
+  window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Muzhik 2066"),
+  GAME_STATE(GameState::getInstance())
+{
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
   window.setMouseCursorVisible(false);
 }
 
-int Game::menuLoop() {   
-  Menu menu;
-  while(window.isOpen() && !(menu.GameStarted)) {
-    menu.drawMenu(window);
-    switch (menu.menu_loop(window)) {
-      case menu.MUTE_AUDIO:
-        IS_GAME_MUTED = true;
-        SndMgr.is_muted = true;
-        break;
-
-      case menu.UNMUTE_AUDIO:
-        IS_GAME_MUTED = false;
-        SndMgr.is_muted = false;
-        break;
-
-      case menu.QUIT:
-        return -1;
-        break;
-
-      case menu.START_GAME:
-        return 0;
-
-      case menu.SURVIVAL:
-        return 1;
-    }
+void Game::MainLoop() {   
+  MainMenu* menu = new MainMenu(m_uidata);
+  menu->displayMenu(window);
+  if (GAME_STATE.isStarted) {
+    delete menu;
+    lvl1Loop();
   }
-  window.clear();
-  return -11;
+  // while(window.isOpen() && !(menu.GameStarted)) {
+  //   menu.drawMenu(window);
+  //   switch (menu.menu_loop(window)) {
+  //     case menu.MUTE_AUDIO:
+  //       IS_GAME_MUTED = true;
+  //       SndMgr.is_muted = true;
+  //       break;
+
+  //     case menu.UNMUTE_AUDIO:
+  //       IS_GAME_MUTED = false;
+  //       SndMgr.is_muted = false;
+  //       break;
+
+  //     case menu.QUIT:
+  //       return -1;
+  //       break;
+
+  //     case menu.START_GAME:
+  //       return 0;
+
+  //     case menu.SURVIVAL:
+  //       return 1;
+  //   }
+  // }
+  Logger::log_clr("Exiting main loop...");
 }
 
 void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
@@ -89,7 +92,7 @@ void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
 }
 
 void Game::game_over(const sf::Font& font, int& score) {
-  using namespace Controls;
+  using namespace sf::Keyboard;
   
   sf::Text game_over(font, "Game over!", 50);  
   game_over.setPosition({260, 120});
@@ -117,14 +120,14 @@ void Game::game_over(const sf::Font& font, int& score) {
     window.clear();
     while(const std::optional event = window.pollEvent()) {
       auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
-      if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
+      if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Up) {
         options_list.at(option)->setFillColor(sf::Color::White);
         if (option == Restart)
           option = Quit;
         else
           --option;
         options_list.at(option)->setFillColor(sf::Color::Green);
-      } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
+      } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Down) {
         options_list.at(option)->setFillColor(sf::Color::White);
         ++option;
         if (option > Quit)
@@ -133,7 +136,7 @@ void Game::game_over(const sf::Font& font, int& score) {
       }
       switch (option) {
         case Restart:
-          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) {
+          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Enter) {
             if (game_mode == Game_Level)
               lvl1Loop();
             else  
@@ -142,7 +145,7 @@ void Game::game_over(const sf::Font& font, int& score) {
           break;
 
         case Quit:
-          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) 
+          if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Enter) 
             exit(1);
           break;
       }
@@ -167,7 +170,7 @@ void Game::win_screen(int& score, int& plr_lives, const sf::Font& font) {
   final_score.setPosition({60, 300});
   while (window.isOpen()) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M))
-      menuLoop();
+      MainLoop();
     window.clear();
     window.draw(winbg);
     window.draw(final_score);
@@ -177,6 +180,7 @@ void Game::win_screen(int& score, int& plr_lives, const sf::Font& font) {
 
 // the "survival loop" MUST NOT load anything except its own DATA!!!
 void Game::survival_loop() {
+  using namespace sf::Keyboard;
   game_mode = Game_Survival;
   // UI for level
   const sf::Font UI_font("../assets/gfx/dynapuff.ttf");
@@ -262,7 +266,7 @@ void Game::survival_loop() {
       
       // game pause
       if(event->is<sf::Event::KeyReleased>() 
-        && keyReleased->code == Controls::ESC) { 
+        && keyReleased->code == Key::Escape) { 
         survival.stop_music();
 
         frame_clock.restart();
@@ -368,6 +372,7 @@ void Game::survival_loop() {
 
 
 void Game::lvl1Loop() {
+  using namespace sf::Keyboard;
   game_mode = Game_Level;
   // UI for level
   const sf::Font UI_font("../assets/gfx/dynapuff.ttf");
@@ -456,7 +461,7 @@ void Game::lvl1Loop() {
       
       // game pause
       if(event->is<sf::Event::KeyReleased>() 
-        && keyReleased->code == Controls::ESC) { 
+        && keyReleased->code == Key::Escape) { 
         lvl1.stop_music();
 
         frame_clock.restart();

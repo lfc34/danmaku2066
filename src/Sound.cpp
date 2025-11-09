@@ -1,6 +1,8 @@
 /// PORTED TO SFML3
 #include "Sound.hpp"
 
+#include "Logger.hpp"
+
 #include <iostream>
 
 const sf::SoundBuffer dummy_sb;
@@ -16,7 +18,7 @@ int SoundManager::load_snd(Sound &snd, const std::string &snd_path) {
     return 1;
   }
   snd.snd.setBuffer(snd.sndBuf);
-  std::clog << snd_path << " loaded succesfully\n";
+  Logger::log_msg(snd_path + " loaded succesfully\n");
   return 0;
 }
 

@@ -1,11 +1,123 @@
 /// PORTED TO SFML3
-#include "Menu.hpp"
+#include "Interface.hpp"
 
+#include <cstdint>
+#include <functional>
 #include <iostream>
 
-#include "Controls.hpp"
+#include "GameState.hpp"
+#include "Logger.hpp"
+#include "SFML/Window/Keyboard.hpp"
 
-using namespace Controls;
+//////////////////////////////////////////
+////////// INTERFACE DATA
+InterfaceData::InterfaceData()
+: MainMenuFont("../assets/gfx/HussarBold.otf"),
+  MainMenuTexture("../assets/gfx/menu_bg.png")
+{
+  Logger::log_msg("Interface assets loaded successfully");
+}
+
+//////////////////////////////////////////
+////////// BUTTON
+Button::Button(const std::string text, const sf::Font &font_ref, const std::uint8_t font_size) 
+: m_text(text),
+  m_font_ref(font_ref),
+  m_font_size(font_size),
+  drawable(m_font_ref, m_text, m_font_size)
+{
+  Logger::log_msg(m_text + " button constructed successfully");
+}
+
+bool Button::isSelected() {
+  return m_selected;
+}
+void Button::select() {
+  drawable.setFillColor(sf::Color::Green);
+  m_selected = true;
+  Logger::log_msg(m_text + " is selected");
+}
+void Button::unselect() {
+  drawable.setFillColor(sf::Color::White);
+  m_selected = false;
+  Logger::log_msg(m_text + " is unselected");
+}
+void Button::setFunc(const std::function<void(void)> fn) {
+  m_btn_func = fn;
+  Logger::log_msg(m_text + " added functionality");
+}
+void Button::press() {
+  Logger::log_msg(m_text + " button pressed");
+  m_btn_func();
+}
+
+///////////////////////////////////////////
+////////// MAIN MENU
+MainMenu::MainMenu(const InterfaceData& uidata)
+: m_uidata(uidata),
+  GAME_STATE(GameState::getInstance())
+{
+  m_buttons.at(Start) = new Button("Start", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Start)->drawable.setPosition({340, 200});
+  m_buttons.at(Start)->setFunc([this](void){ GAME_STATE.isStarted = true; });
+  m_buttons.at(Survival) = new Button("Survival mode", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Survival)->drawable.setPosition({250, 250});
+  m_buttons.at(Mute) = new Button("Audio: ON", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Mute)->drawable.setPosition({300, 300});
+  m_buttons.at(Quit) = new Button("Quit", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Quit)->drawable.setPosition({350, 350});
+  m_buttons.at(Quit)->setFunc([](void) {exit(0);});
+  Logger::log_msg("Constructed MainMenu");
+}
+
+void MainMenu::displayMenu(sf::RenderWindow& window) {
+  using namespace sf::Keyboard;
+  sf::Sprite menu_bg(m_uidata.MainMenuTexture);
+  int opt = Start;
+  m_buttons.at(opt)->select(); // select Start button
+  while (window.isOpen()) {
+    // handle events
+    while(const std::optional event = window.pollEvent()) {
+      auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
+      if (event->is<sf::Event::Closed>()) {
+        window.close();
+      }
+      
+      // picking an option
+      if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Down) {
+        m_buttons.at(opt)->unselect();
+        opt++;
+        if (opt > Quit) opt = Start;
+        m_buttons.at(opt)->select();
+      } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Up) {
+        m_buttons.at(opt)->unselect();
+        opt--;
+        if (opt < Start) opt = Quit;
+        m_buttons.at(opt)->select();
+      }
+
+      if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Enter) {
+        m_buttons.at(opt)->press();
+        return;
+      }
+    }
+
+    // draw menu
+    window.clear();
+    window.draw(menu_bg);
+    for (auto& btn: m_buttons) {
+      window.draw(btn->drawable);
+    }
+    window.display();
+  }
+}
+
+MainMenu::~MainMenu() {
+  // delete buttons from memory
+  for (auto& i : m_buttons) {
+    delete i;
+  }
+}
 
 // hack to suppress "no default constructor error"
 const sf::Texture dummy_texture;
@@ -69,16 +181,17 @@ QuitButton(dummy_text)
 }
 
 int Menu::menu_loop(sf::RenderWindow& w) {
+  using namespace sf::Keyboard;
   while(const std::optional event = w.pollEvent()) {
     auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
-    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Up) {
       unselectButton(MenuButtons.at(SelectedOption));
       if (SelectedOption == Start) 
         SelectedOption = Quit;
       else  
         --SelectedOption; 
       selectButton(MenuButtons.at(SelectedOption));
-    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
+    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Down) {
       unselectButton(MenuButtons.at(SelectedOption));
       ++SelectedOption;
       if (SelectedOption > Quit) 
@@ -86,7 +199,7 @@ int Menu::menu_loop(sf::RenderWindow& w) {
       selectButton(MenuButtons.at(SelectedOption));
     }
       
-    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET) {
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Enter) {
       switch (SelectedOption) {
         case Start:
           //this break menu loop and allows to play the game
@@ -155,16 +268,17 @@ void PauseMenu::draw_menu(sf::RenderWindow& w) {
 }
 
 int PauseMenu::menu_loop(sf::RenderWindow& w) {
+  using namespace sf::Keyboard;
   while (const std::optional event = w.pollEvent()) {
     auto* keyReleased = event->getIf<sf::Event::KeyReleased>();
-    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == UP) {
+    if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Up) {
       unselectButton(options_list.at(selected_opt));
       if (selected_opt == Continue)
         selected_opt = Quit;
       else
        --selected_opt;
       selectButton(options_list.at(selected_opt));
-    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == DOWN) {
+    } else if (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Down) {
       unselectButton(options_list.at(selected_opt));
       ++selected_opt;
       if (selected_opt > Quit)
@@ -172,7 +286,7 @@ int PauseMenu::menu_loop(sf::RenderWindow& w) {
       selectButton(options_list.at(selected_opt));
     }
 
-    bool pressed_ret = (event->is<sf::Event::KeyReleased>() && keyReleased->code == RET);
+    bool pressed_ret = (event->is<sf::Event::KeyReleased>() && keyReleased->code == Key::Enter);
     switch(selected_opt) {
       case Continue:
         if(pressed_ret)
