@@ -8,8 +8,11 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include "GameState.hpp"
+
 class Level {
 private:
+	GameState& GAME_STATE;
 	sf::Music LvlMusic;
 	sf::Music boss_music;
 	sf::Texture BgTexture;
@@ -21,8 +24,8 @@ public:
 			@param accepts render window to draw background on */
 	void drawLevel(sf::RenderWindow& w);
 	// TODO: in future the volume of music will be set in settings
-	void playMusic(bool is_muted);
+	void playMusic();
 	void stop_music();
 	void load_boss_mus(const char* path);
-	void play_boss_mus(bool is_muted);
+	void play_boss_mus();
 };

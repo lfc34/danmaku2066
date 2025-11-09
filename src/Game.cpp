@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "Defaults.hpp"
+#include "GameState.hpp"
 #include "Interface.hpp"
 #include "Logger.hpp"
 #include "Projectile.hpp"
@@ -26,34 +27,15 @@ Game::Game() :
 void Game::MainLoop() {   
   MainMenu* menu = new MainMenu(m_uidata);
   menu->displayMenu(window);
-  if (GAME_STATE.isStarted) {
+  if (GAME_STATE.scene == GameState::LEVEL) {
     delete menu;
     lvl1Loop();
   }
-  // while(window.isOpen() && !(menu.GameStarted)) {
-  //   menu.drawMenu(window);
-  //   switch (menu.menu_loop(window)) {
-  //     case menu.MUTE_AUDIO:
-  //       IS_GAME_MUTED = true;
-  //       SndMgr.is_muted = true;
-  //       break;
-
-  //     case menu.UNMUTE_AUDIO:
-  //       IS_GAME_MUTED = false;
-  //       SndMgr.is_muted = false;
-  //       break;
-
-  //     case menu.QUIT:
-  //       return -1;
-  //       break;
-
-  //     case menu.START_GAME:
-  //       return 0;
-
-  //     case menu.SURVIVAL:
-  //       return 1;
-  //   }
-  // }
+  if (GAME_STATE.scene == GameState::SURVIVAL) {
+    delete menu;
+    survival_loop();
+  }
+  delete menu;
   Logger::log_clr("Exiting main loop...");
 }
 
@@ -61,10 +43,9 @@ void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
   enum PauseReturn {
     Continue = 1,
     Restart = 2,
-    Unmute,
-    Mute
+    Audio
   };
-  PauseMenu pm(IS_GAME_MUTED);
+  PauseMenu pm;
   bool paused = true;
   while (window.isOpen() && paused) {
     // constantly restart timers to keep them at 0
@@ -76,12 +57,8 @@ void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
         paused = false;
         break;
 
-      case Unmute:
-        IS_GAME_MUTED = false;
-        break;
-
-      case Mute: 
-        IS_GAME_MUTED = true;
+      case Audio: 
+        GAME_STATE.toggleAudio();
         break;
 
       case Restart:
@@ -230,15 +207,9 @@ void Game::survival_loop() {
   Level survival("../assets/sfx/surv.ogg",
   "../assets/gfx/bg_surv.jpg");
 
-  survival.playMusic(IS_GAME_MUTED);
+  survival.playMusic();
    // ====== GAME LOOP ====== //
   while(window.isOpen()) {
-
-    // to make mute audio button work
-    if (IS_GAME_MUTED)
-      SndMgr.is_muted = true;
-    else  
-      SndMgr.is_muted = false;
 
     //clear window at the start of each frame
     window.clear();
@@ -272,7 +243,7 @@ void Game::survival_loop() {
         frame_clock.restart();
         game_pause(frame_clock, frame_clock);
         // after continuing the gaem
-        survival.playMusic(IS_GAME_MUTED);
+        survival.playMusic();
         frame_clock.restart();
       }
     }
@@ -417,7 +388,7 @@ void Game::lvl1Loop() {
 
   lvl1.load_boss_mus("../assets/sfx/boss1.ogg");
   
-  lvl1.playMusic(IS_GAME_MUTED);
+  lvl1.playMusic();
   
   // Number of enemies for every wave
   std::array<int, 8> enemies_in_wave = {10, 10, 5, 5, 14, 14, 15, 15};
@@ -428,12 +399,6 @@ void Game::lvl1Loop() {
 
     // ====== GAME LOOP ====== //
   while(window.isOpen()) {
-
-    // to make mute audio button work
-    if (IS_GAME_MUTED)
-      SndMgr.is_muted = true;
-    else  
-      SndMgr.is_muted = false;
 
     //clear window at the start of each frame
     window.clear();
@@ -467,7 +432,7 @@ void Game::lvl1Loop() {
         frame_clock.restart();
         game_pause(frame_clock, frame_clock);
         // after continuing the gaem
-        lvl1.playMusic(IS_GAME_MUTED);
+        lvl1.playMusic();
         frame_clock.restart();
       }
     }
@@ -584,7 +549,7 @@ void Game::lvl1Loop() {
       for (auto& boss : boss_arr) {
         if (!(boss.triggered)) {
           boss.trigger();
-          lvl1.play_boss_mus(IS_GAME_MUTED);
+          lvl1.play_boss_mus();
         } else {
           window.draw(boss.get_sprite());
           if (boss.update_boss(delta, time_wave)) {

@@ -4,12 +4,14 @@
 #include <iostream>
 
 #include "Defaults.hpp"
+#include "GameState.hpp"
 
 // hack to supress the "no default contructor error"
 const sf::Texture dummy_texture;
 
 Level::Level(std::string mus_path, std::string texture_path)
-: BgSprite(dummy_texture)
+: BgSprite(dummy_texture),
+  GAME_STATE(GameState::getInstance())
 {
   std::clog << "Loading music...\n";
   if (!(LvlMusic.openFromFile(mus_path))) {
@@ -40,8 +42,8 @@ void Level::load_boss_mus(const char *path) {
   }
 }
 
-void Level::play_boss_mus(bool is_muted) {
-  if (is_muted) {
+void Level::play_boss_mus() {
+  if (GAME_STATE.isMuted()) {
     boss_music.setVolume(0);
   } else {
     LvlMusic.stop();
@@ -50,8 +52,8 @@ void Level::play_boss_mus(bool is_muted) {
   }
 }
 
-void Level::playMusic(bool is_muted) {
-  if (is_muted) {
+void Level::playMusic() {
+  if (GAME_STATE.isMuted()) {
     LvlMusic.setVolume(0);
   } else {
     LvlMusic.setVolume(MUSIC_VOLUME);

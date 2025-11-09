@@ -21,9 +21,6 @@ struct InterfaceData {
 
 class Button {
 private:
-  const std::string m_text;
-  const sf::Font &m_font_ref;
-  const std::uint8_t m_font_size;
   bool m_selected = false;
   std::function<void(void)> m_btn_func;
   
@@ -50,7 +47,7 @@ private:
   std::array<Button*, 4> m_buttons;
   const std::uint8_t m_font_size = 40;
 public:
-  enum Option { Start, Survival, Mute, Quit };
+  enum Option { Start, Survival, Audio, Quit };
   MainMenu(const InterfaceData& uidata);
   void displayMenu(sf::RenderWindow& window);
   ~MainMenu();
@@ -69,7 +66,6 @@ private:
   enum Option { Start, Survival, Mute, Quit };
   std::vector<sf::Text *> MenuButtons;
   size_t SelectedOption;
-  bool is_muted_game = false;
 
 public:
   enum MenuReturn { START_GAME, SURVIVAL, MUTE_AUDIO, UNMUTE_AUDIO, QUIT };
@@ -85,6 +81,7 @@ public:
 
 class PauseMenu : public Menu {
 private:
+  GameState& GAME_STATE;
   const unsigned int FontSize{40};
   sf::Font font;
   sf::Text continue_btn;
@@ -97,7 +94,7 @@ private:
   // Makes it possible to mute game via pause menu
 
 public:
-  PauseMenu(bool &is_muted_game);
+  PauseMenu();
   void draw_menu(sf::RenderWindow &w);
   int menu_loop(sf::RenderWindow &w);
 };

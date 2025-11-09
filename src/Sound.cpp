@@ -1,6 +1,7 @@
 /// PORTED TO SFML3
 #include "Sound.hpp"
 
+#include "GameState.hpp"
 #include "Logger.hpp"
 
 #include <iostream>
@@ -12,6 +13,7 @@ SoundManager::Sound::Sound()
 {
 }
 
+// will be deleted soon thanks to new SFML api
 int SoundManager::load_snd(Sound &snd, const std::string &snd_path) {
   if (!(snd.sndBuf.loadFromFile(snd_path))) {
     std::cerr << "Error loading " << snd_path << "\n";
@@ -33,7 +35,9 @@ int SoundManager::loadSounds() {
   return 0;
 }
 
-SoundManager::SoundManager() {
+SoundManager::SoundManager() 
+: GAME_STATE(GameState::getInstance())
+{
   if (loadSounds() == 0) {
     std::clog << "All sounds loaded successfully!\n";
   } else {
@@ -42,8 +46,9 @@ SoundManager::SoundManager() {
   }
 }
 
+// replace strings with enum
 void SoundManager::playSound(const std::string &Name) {
-  if (!is_muted) {
+  if (!GAME_STATE.isMuted()) {
     if (Name == "bullet_shot")
       BltSound.snd.play();
     else if (Name == "fairy_death")
@@ -58,5 +63,3 @@ void SoundManager::playSound(const std::string &Name) {
       GameWin.snd.play();
   }
 }
-
-SoundManager::~SoundManager() { std::clog << "Sounds unloaded\n"; }

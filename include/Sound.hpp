@@ -1,15 +1,17 @@
 /// PORTED TO SFML3
 // THIS IS BULLSHIT!@!!!!
+// ALL THE SOUNDS, sprites, fonts, ETC, used in game MUST be in GameData
 
 #pragma once
 
+#include "GameState.hpp"
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 
 class SoundManager {
 private:
+  GameState& GAME_STATE;
   struct Sound {
-    public:
     Sound();
     sf::SoundBuffer sndBuf;
     sf::Sound snd;
@@ -23,10 +25,8 @@ private:
   Sound GameWin;
 
 public:
-  bool is_muted = false;
   int load_snd(Sound &snd, const std::string &snd_path);
   int loadSounds();
   SoundManager();
-  ~SoundManager();
   void playSound(const std::string &Name);
 };
