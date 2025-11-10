@@ -25,50 +25,31 @@ Game::Game() :
 }
 
 void Game::MainLoop() {   
-  MainMenu* menu = new MainMenu(m_uidata);
-  menu->displayMenu(window);
-  if (GAME_STATE.scene == GameState::LEVEL) {
-    delete menu;
-    lvl1Loop();
+  while (true) {
+    if (GAME_STATE.scene == GameState::MENU) {
+      std::unique_ptr<MainMenu> menu = std::make_unique<MainMenu>(m_uidata);
+      menu->displayMenu(window);
+    }
+    if (GAME_STATE.scene == GameState::LEVEL) {
+      lvl1Loop();
+    }
+    if (GAME_STATE.scene == GameState::SURVIVAL) {
+      survival_loop();
+    }
   }
-  if (GAME_STATE.scene == GameState::SURVIVAL) {
-    delete menu;
-    survival_loop();
-  }
-  delete menu;
   Logger::log_clr("Exiting main loop...");
 }
 
-void Game::game_pause(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
-  enum PauseReturn {
-    Continue = 1,
-    Restart = 2,
-    Audio
-  };
-  PauseMenu pm;
-  bool paused = true;
-  while (window.isOpen() && paused) {
-    // constantly restart timers to keep them at 0
-    wave_clock.restart();
-    spawn_timer.restart();
-    pm.draw_menu(window);
-    switch (pm.menu_loop(window)) {
-      case Continue:
-        paused = false;
-        break;
-
-      case Audio: 
-        GAME_STATE.toggleAudio();
-        break;
-
-      case Restart:
-        lvl1Loop();
-        break;
-    }
-  }
+void Game::pauseGame(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
+  PauseMenu pm(m_uidata);
+  // constantly restart timers to keep them at 0
+  wave_clock.restart();
+  spawn_timer.restart();
+  pm.displayMenu(window);
+  if (GAME_STATE.scene == GameState::LEVEL) return;
 }
 
-void Game::game_over(const sf::Font& font, int& score) {
+void Game::showGameOverScreen(const sf::Font& font, int& score) {
   using namespace sf::Keyboard;
   
   sf::Text game_over(font, "Game over!", 50);  
@@ -135,7 +116,7 @@ void Game::game_over(const sf::Font& font, int& score) {
   }
 }
 
-void Game::win_screen(int& score, int& plr_lives, const sf::Font& font) {
+void Game::showFinalScoreScreen(int& score, int& plr_lives, const sf::Font& font) {
   sf::Texture winbg_t;
   if(!(winbg_t.loadFromFile("../assets/gfx/winscreen.png"))) {
     std::cerr << "Failed to load win screen (lmao). Exiting...\n";
@@ -241,7 +222,8 @@ void Game::survival_loop() {
         survival.stop_music();
 
         frame_clock.restart();
-        game_pause(frame_clock, frame_clock);
+        pauseGame(frame_clock, frame_clock);
+        if (GAME_STATE.scene == GameState::MENU) return;
         // after continuing the gaem
         survival.playMusic();
         frame_clock.restart();
@@ -252,7 +234,7 @@ void Game::survival_loop() {
       std::clog << "Player died\n";
       SndMgr.playSound("player_death");
       survival.stop_music();
-      game_over(UI_font, lvl_score);
+      showGameOverScreen(UI_font, lvl_score);
     }
     
     // ====== ENEMY WAVES PART ====== //
@@ -430,7 +412,8 @@ void Game::lvl1Loop() {
         lvl1.stop_music();
 
         frame_clock.restart();
-        game_pause(frame_clock, frame_clock);
+        pauseGame(frame_clock, frame_clock);
+        if (GAME_STATE.scene == GameState::MENU) return;
         // after continuing the gaem
         lvl1.playMusic();
         frame_clock.restart();
@@ -441,7 +424,7 @@ void Game::lvl1Loop() {
       std::clog << "Player died\n";
       SndMgr.playSound("player_death");
       lvl1.stop_music();
-      game_over(UI_font, lvl_score);
+      showGameOverScreen(UI_font, lvl_score);
     }
     
     // ====== ENEMY WAVES PART ====== //
@@ -556,7 +539,7 @@ void Game::lvl1Loop() {
             lvl_score+=1000;
             lvl1.stop_music();
             SndMgr.playSound("game_win");
-            win_screen(lvl_score, player->lives, UI_font);
+            showFinalScoreScreen(lvl_score, player->lives, UI_font);
           }
         }
       }

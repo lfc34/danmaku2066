@@ -36,9 +36,9 @@ public:
   SoundManager SndMgr;
 
   void MainLoop();
-  void game_pause(sf::Clock &wave_timer, sf::Clock &spawn_timer);
-  void game_over(const sf::Font &font, int &score);
-  void win_screen(int &f_score, int &plr_lives, const sf::Font &font);
+  void pauseGame(sf::Clock &wave_timer, sf::Clock &spawn_timer);
+  void showGameOverScreen(const sf::Font &font, int &score);
+  void showFinalScoreScreen(int &f_score, int &plr_lives, const sf::Font &font);
   void lvl1Loop();
   void survival_loop();
   // TODO: if possible, make it output message about either successful

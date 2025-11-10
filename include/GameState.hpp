@@ -7,7 +7,8 @@ public:
   enum GS_CurrentScene {
     MENU,
     LEVEL,
-    SURVIVAL
+    SURVIVAL,
+    PAUSE
   };
   GS_CurrentScene scene = MENU;
   static GameState& getInstance() {
