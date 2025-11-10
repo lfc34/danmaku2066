@@ -2,6 +2,7 @@
 # Danmaku 2066
 
 This is a simple shoot-em-up game built using SFML and C++. 
+<img width="789" height="599" alt="screen_gp_m2066" src="https://github.com/user-attachments/assets/bb2e41d1-bea1-4e3e-8b9a-13677cbc46c7" />
 
 ## Obtaining game
 
