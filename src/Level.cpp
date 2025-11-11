@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include "Defaults.hpp"
 #include "GameState.hpp"
 
 // hack to supress the "no default contructor error"
@@ -26,12 +25,12 @@ Level::Level(std::string mus_path, std::string texture_path)
   }
 
   BgSprite.setTexture(BgTexture, true);
-  BgSprite.setOrigin({0, SCREEN_HEIGHT});
+  BgSprite.setOrigin({0, 600});
 }
 
 void Level::drawLevel(sf::RenderWindow &w) {
   w.draw(BgSprite);
-  if (!(BgSprite.getPosition().y > SCREEN_HEIGHT))
+  if (!(BgSprite.getPosition().y > 600))
     BgSprite.move({0, 0.2f});
 }
 
@@ -47,7 +46,7 @@ void Level::play_boss_mus() {
     boss_music.setVolume(0);
   } else {
     LvlMusic.stop();
-    boss_music.setVolume(MUSIC_VOLUME);
+    boss_music.setVolume(65);
     boss_music.play();
   }
 }
@@ -56,7 +55,7 @@ void Level::playMusic() {
   if (GAME_STATE.isMuted()) {
     LvlMusic.setVolume(0);
   } else {
-    LvlMusic.setVolume(MUSIC_VOLUME);
+    LvlMusic.setVolume(65);
     LvlMusic.play();
   }
 }
