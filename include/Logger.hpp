@@ -10,6 +10,9 @@
 
 #ifdef ENABLE_LOGGER 
 
+// LVL 0 - only impotant logs (critical errors (red))
+// LVL 1 - important logs (all LVL 0 logs + warnings (yellow), game state (green))
+// LVL 2 - misc (all LVL 0, LVL1 logs + misc messages (white))
 namespace Logger {
     const std::string YELLOW = "\033[33m";
     const std::string RED = "\033[31m";
@@ -19,7 +22,7 @@ namespace Logger {
     inline void status() {
         std::cout << GREEN << "Logger is enabled" << RESET << "\n";
     }
-    // print red message, \n added automatically
+    // print red message, \n added automatically 
     inline void log_err(const std::string &err) {
         std::cerr << RED << err << RESET << "\n";
     }

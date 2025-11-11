@@ -7,7 +7,6 @@
 #include <SFML/Graphics/Text.hpp>
 
 #include <cstdint>
-#include <array>
 #include <functional>
 
 #include "GameState.hpp"
@@ -28,7 +27,6 @@ private:
 public:
   sf::Text drawable;
   Button(const std::string text, const sf::Font &font_ref, const std::uint8_t font_size);
-  Button(Button &) = delete;
   // Add functionality to button
   bool isSelected();
   void select();
@@ -39,30 +37,28 @@ public:
   void press();
 };
 
-// all assets must be in InterfaceData, only functionality should be left here
-// Singletone
-class MainMenu {
-private:
+class Menu {
+protected:
   GameState& GAME_STATE;
+  const std::uint8_t m_font_size = 40; // default
   const InterfaceData& m_uidata;
-  const std::uint8_t m_font_size = 40;
-  std::array<Button*, 4> m_buttons;
+  std::vector<Button> m_buttons;
+
+public:
+  Menu(const InterfaceData& uidata); 
+  virtual void displayMenu(sf::RenderWindow& window) = 0;
+};
+
+class MainMenu : public Menu {
 public:
   enum Option { Start, Survival, Audio, Quit };
   MainMenu(const InterfaceData& uidata);
-  void displayMenu(sf::RenderWindow& window);
-  ~MainMenu();
+  void displayMenu(sf::RenderWindow& window) override;
 };
 
-class PauseMenu {
-private:
-  GameState& GAME_STATE;
-  const InterfaceData& m_uidata;
-  const std::uint8_t m_font_size = 40;
-  std::array<Button*, 4> m_buttons;
+class PauseMenu : public Menu {
 public:
   enum Option { Continue, Audio, BackToMenu, Quit };
   PauseMenu(const InterfaceData& uidata);
-  void displayMenu(sf::RenderWindow &window);
-  ~PauseMenu();
+  void displayMenu(sf::RenderWindow &window) override;
 };

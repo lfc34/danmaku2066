@@ -47,31 +47,79 @@ void Button::press() {
 }
 
 ///////////////////////////////////////////
+////////// MENU
+Menu::Menu(const InterfaceData& uidata) 
+: GAME_STATE(GameState::getInstance()),
+  m_uidata(uidata)
+{
+}
+
+///////////////////////////////////////////
 ////////// MAIN MENU
-MainMenu::MainMenu(const InterfaceData &uidata)
-    : m_uidata(uidata), GAME_STATE(GameState::getInstance()) {
-  m_buttons.at(Start) = new Button("Start", m_uidata.MainMenuFont, m_font_size);
-  m_buttons.at(Start)->drawable.setPosition({340, 200});
-  m_buttons.at(Start)->setFunc(
+// MainMenu::MainMenu(const InterfaceData& uidata) : Menu(uidata)
+// {
+//   m_buttons.at(Start) = new Button("Start", m_uidata.MainMenuFont, m_font_size);
+//   m_buttons.at(Start)->drawable.setPosition({340, 200});
+//   m_buttons.at(Start)->setFunc(
+//       [this](void) { GAME_STATE.scene = GameState::LEVEL; });
+
+//   m_buttons.at(Survival) =
+//       new Button("Survival mode", m_uidata.MainMenuFont, m_font_size);
+//   m_buttons.at(Survival)->drawable.setPosition({250, 250});
+//   m_buttons.at(Survival)->setFunc(
+//       [this](void) { GAME_STATE.scene = GameState::SURVIVAL; });
+
+//   if (GAME_STATE.isMuted()) {
+//     m_buttons.at(Audio) =
+//         new Button("Audio: OFF", m_uidata.MainMenuFont, m_font_size);
+//   } else {
+//     m_buttons.at(Audio) =
+//         new Button("Audio: ON", m_uidata.MainMenuFont, m_font_size);
+//   }
+//   m_buttons.at(Audio)->drawable.setPosition({300, 300});
+//   m_buttons.at(Audio)->setFunc([this](void) {
+//     GAME_STATE.toggleAudio();
+//     if (GAME_STATE.isMuted())
+//       m_buttons.at(Audio)->drawable.setString("Audio: OFF");
+//     else
+//       m_buttons.at(Audio)->drawable.setString("Audio: ON");
+//   });
+
+//   m_buttons.at(Quit) = new Button("Quit", m_uidata.MainMenuFont, m_font_size);
+//   m_buttons.at(Quit)->drawable.setPosition({350, 350});
+//   m_buttons.at(Quit)->setFunc([](void) { exit(0); });
+//   Logger::log_msg("Constructed MainMenu");
+// }
+
+MainMenu::MainMenu(const InterfaceData& uidata) : Menu(uidata)
+{
+  m_buttons.emplace_back("Start", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Start).drawable.setPosition({340, 200});
+  m_buttons.at(Start).setFunc(
       [this](void) { GAME_STATE.scene = GameState::LEVEL; });
-  m_buttons.at(Survival) =
-      new Button("Survival mode", m_uidata.MainMenuFont, m_font_size);
-  m_buttons.at(Survival)->drawable.setPosition({250, 250});
-  m_buttons.at(Survival)->setFunc(
+
+  m_buttons.emplace_back("Survival mode", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Survival).drawable.setPosition({250, 250});
+  m_buttons.at(Survival).setFunc(
       [this](void) { GAME_STATE.scene = GameState::SURVIVAL; });
-  m_buttons.at(Audio) =
-      new Button("Audio: ON", m_uidata.MainMenuFont, m_font_size);
-  m_buttons.at(Audio)->drawable.setPosition({300, 300});
-  m_buttons.at(Audio)->setFunc([this](void) {
+
+  if (GAME_STATE.isMuted()) {
+    m_buttons.emplace_back("Audio: OFF", m_uidata.MainMenuFont, m_font_size);
+  } else {
+    m_buttons.emplace_back("Audio: ON", m_uidata.MainMenuFont, m_font_size);
+  }
+  m_buttons.at(Audio).drawable.setPosition({300, 300});
+  m_buttons.at(Audio).setFunc([this](void) {
     GAME_STATE.toggleAudio();
     if (GAME_STATE.isMuted())
-      m_buttons.at(Audio)->drawable.setString("Audio: OFF");
+      m_buttons.at(Audio).drawable.setString("Audio: OFF");
     else
-      m_buttons.at(Audio)->drawable.setString("Audio: ON");
+      m_buttons.at(Audio).drawable.setString("Audio: ON");
   });
-  m_buttons.at(Quit) = new Button("Quit", m_uidata.MainMenuFont, m_font_size);
-  m_buttons.at(Quit)->drawable.setPosition({350, 350});
-  m_buttons.at(Quit)->setFunc([](void) { exit(0); });
+
+  m_buttons.emplace_back("Quit", m_uidata.MainMenuFont, m_font_size);
+  m_buttons.at(Quit).drawable.setPosition({350, 350});
+  m_buttons.at(Quit).setFunc([](void) { exit(0); });
   Logger::log_msg("Constructed MainMenu");
 }
 
@@ -79,35 +127,36 @@ void MainMenu::displayMenu(sf::RenderWindow &window) {
   using namespace sf::Keyboard;
   sf::Sprite menu_bg(m_uidata.MainMenuTexture);
   int opt = Start;
-  m_buttons.at(opt)->select(); // select Start button
+  m_buttons.at(opt).select(); // select Start button
   while (window.isOpen()) {
     // handle events
     while (const std::optional event = window.pollEvent()) {
       auto *keyReleased = event->getIf<sf::Event::KeyReleased>();
       if (event->is<sf::Event::Closed>()) {
         window.close();
+        exit(0);
       }
 
       // picking an option
       if (event->is<sf::Event::KeyReleased>() &&
           keyReleased->code == Key::Down) {
-        m_buttons.at(opt)->unselect();
+        m_buttons.at(opt).unselect();
         opt++;
         if (opt > Quit)
           opt = Start;
-        m_buttons.at(opt)->select();
+        m_buttons.at(opt).select();
       } else if (event->is<sf::Event::KeyReleased>() &&
                  keyReleased->code == Key::Up) {
-        m_buttons.at(opt)->unselect();
+        m_buttons.at(opt).unselect();
         opt--;
         if (opt < Start)
           opt = Quit;
-        m_buttons.at(opt)->select();
+        m_buttons.at(opt).select();
       }
 
       if (event->is<sf::Event::KeyReleased>() &&
           keyReleased->code == Key::Enter) {
-        m_buttons.at(opt)->press();
+        m_buttons.at(opt).press();
         if (opt != Audio)
           return;
       }
@@ -117,80 +166,75 @@ void MainMenu::displayMenu(sf::RenderWindow &window) {
     window.clear();
     window.draw(menu_bg);
     for (auto &btn : m_buttons) {
-      window.draw(btn->drawable);
+      window.draw(btn.drawable);
     }
     window.display();
   }
 }
 
-MainMenu::~MainMenu() {
-  // delete buttons from memory
-  for (auto &i : m_buttons) {
-    delete i;
-  }
-}
-
-PauseMenu::PauseMenu(const InterfaceData& uidata)
-: GAME_STATE(GameState::getInstance()),
-  m_uidata(uidata)
+PauseMenu::PauseMenu(const InterfaceData& uidata) : Menu(uidata)
 {
-  m_buttons.at(Continue) = new Button("Continue", m_uidata.PauseMenuFont, m_font_size);
-  m_buttons.at(Continue)->drawable.setPosition({290, 200});
-  m_buttons.at(Continue)->setFunc(
+  m_buttons.emplace_back("Continue", m_uidata.PauseMenuFont, m_font_size);
+  m_buttons.at(Continue).drawable.setPosition({290, 200});
+  m_buttons.at(Continue).setFunc(
       [this](void) { GAME_STATE.scene = GameState::LEVEL; });
 
-  m_buttons.at(Audio) =
-      new Button("Audio: ON", m_uidata.PauseMenuFont, m_font_size);
-  m_buttons.at(Audio)->drawable.setPosition({290, 250});
-  m_buttons.at(Audio)->setFunc([this](void) {
+  if (GAME_STATE.isMuted()) {
+    m_buttons.emplace_back("Audio: OFF", m_uidata.PauseMenuFont, m_font_size);
+  } else {
+    m_buttons.emplace_back("Audio: ON", m_uidata.PauseMenuFont, m_font_size);
+  }
+  m_buttons.at(Audio).drawable.setPosition({290, 250});
+  m_buttons.at(Audio).setFunc([this](void) {
     GAME_STATE.toggleAudio();
     if (GAME_STATE.isMuted())
-      m_buttons.at(Audio)->drawable.setString("Audio: OFF");
+      m_buttons.at(Audio).drawable.setString("Audio: OFF");
     else
-      m_buttons.at(Audio)->drawable.setString("Audio: ON");
+      m_buttons.at(Audio).drawable.setString("Audio: ON");
   });
 
-  m_buttons.at(BackToMenu) = new Button("Return to menu", m_uidata.PauseMenuFont, m_font_size);
-  m_buttons.at(BackToMenu)->drawable.setPosition({230, 300});
-  m_buttons.at(BackToMenu)->setFunc([this](void) { GAME_STATE.scene = GameState::MENU; });
+  m_buttons.emplace_back("Return to menu", m_uidata.PauseMenuFont, m_font_size);
+  m_buttons.at(BackToMenu).drawable.setPosition({230, 300});
+  m_buttons.at(BackToMenu).setFunc([this](void) { GAME_STATE.scene = GameState::MENU; });
 
-  m_buttons.at(Quit) = new Button("Quit", m_uidata.PauseMenuFont, m_font_size);
-  m_buttons.at(Quit)->drawable.setPosition({340, 350});
-  m_buttons.at(Quit)->setFunc([](void) { exit(0); });
+  m_buttons.emplace_back("Quit", m_uidata.PauseMenuFont, m_font_size);
+  m_buttons.at(Quit).drawable.setPosition({340, 350});
+  m_buttons.at(Quit).setFunc([](void) { exit(0); });
 }
 
 void PauseMenu::displayMenu(sf::RenderWindow &window) {
   using namespace sf::Keyboard;
   int opt = Continue;
-  m_buttons.at(opt)->select(); // select Start button
+  m_buttons.at(opt).select(); // select Start button
   while (window.isOpen()) {
     // handle events
     while (const std::optional event = window.pollEvent()) {
       auto *keyReleased = event->getIf<sf::Event::KeyReleased>();
       if (event->is<sf::Event::Closed>()) {
         window.close();
+        exit(0);
       }
 
       // picking an option
       if (event->is<sf::Event::KeyReleased>() &&
           keyReleased->code == Key::Down) {
-        m_buttons.at(opt)->unselect();
+        m_buttons.at(opt).unselect();
         opt++;
         if (opt > Quit)
           opt = Continue;
-        m_buttons.at(opt)->select();
+        m_buttons.at(opt).select();
       } else if (event->is<sf::Event::KeyReleased>() &&
                  keyReleased->code == Key::Up) {
-        m_buttons.at(opt)->unselect();
+        m_buttons.at(opt).unselect();
         opt--;
         if (opt < Continue)
           opt = Quit;
-        m_buttons.at(opt)->select();
+        m_buttons.at(opt).select();
       }
 
       if (event->is<sf::Event::KeyReleased>() &&
           keyReleased->code == Key::Enter) {
-        m_buttons.at(opt)->press();
+        m_buttons.at(opt).press();
         if (opt != Audio)
           return;
       }
@@ -199,15 +243,8 @@ void PauseMenu::displayMenu(sf::RenderWindow &window) {
     // draw menu
     window.clear();
     for (auto &btn : m_buttons) {
-      window.draw(btn->drawable);
+      window.draw(btn.drawable);
     }
     window.display();
-  }
-}
-
-PauseMenu::~PauseMenu() {
-  // delete buttons from memory
-  for (auto &i : m_buttons) {
-    delete i;
   }
 }

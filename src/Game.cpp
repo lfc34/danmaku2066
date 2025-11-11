@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "Defaults.hpp"
 #include "GameState.hpp"
 #include "Interface.hpp"
 #include "Logger.hpp"
@@ -16,12 +15,13 @@
 #include "Player.hpp"
 
 Game::Game() : 
-  window(sf::VideoMode({SCREEN_WIDTH, SCREEN_HEIGHT}), "Muzhik 2066"),
+  window(sf::VideoMode({800, 600}), "Muzhik 2066"),
   GAME_STATE(GameState::getInstance())
 {
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
   window.setMouseCursorVisible(false);
+  Logger::log_grn("Game constructed");
 }
 
 void Game::MainLoop() {   
@@ -127,8 +127,10 @@ void Game::showFinalScoreScreen(int& score, int& plr_lives, const sf::Font& font
   sf::Text final_score(font, f_score, 50);
   final_score.setPosition({60, 300});
   while (window.isOpen()) {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M)) {
+      GAME_STATE.scene = GameState::MENU;
       MainLoop();
+    }
     window.clear();
     window.draw(winbg);
     window.draw(final_score);
@@ -213,7 +215,7 @@ void Game::survival_loop() {
       // closing window via cross on the panel
       if(event->is<sf::Event::Closed>()) {
         window.close();
-        break;
+        exit(0);
       }
       
       // game pause
@@ -403,7 +405,7 @@ void Game::lvl1Loop() {
       // closing window via cross on the panel
       if(event->is<sf::Event::Closed>()) {
         window.close();
-        break;
+        exit(0);
       }
       
       // game pause
