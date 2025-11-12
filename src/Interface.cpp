@@ -56,41 +56,6 @@ Menu::Menu(const InterfaceData& uidata)
 
 ///////////////////////////////////////////
 ////////// MAIN MENU
-// MainMenu::MainMenu(const InterfaceData& uidata) : Menu(uidata)
-// {
-//   m_buttons.at(Start) = new Button("Start", m_uidata.MainMenuFont, m_font_size);
-//   m_buttons.at(Start)->drawable.setPosition({340, 200});
-//   m_buttons.at(Start)->setFunc(
-//       [this](void) { GAME_STATE.scene = GameState::LEVEL; });
-
-//   m_buttons.at(Survival) =
-//       new Button("Survival mode", m_uidata.MainMenuFont, m_font_size);
-//   m_buttons.at(Survival)->drawable.setPosition({250, 250});
-//   m_buttons.at(Survival)->setFunc(
-//       [this](void) { GAME_STATE.scene = GameState::SURVIVAL; });
-
-//   if (GAME_STATE.isMuted()) {
-//     m_buttons.at(Audio) =
-//         new Button("Audio: OFF", m_uidata.MainMenuFont, m_font_size);
-//   } else {
-//     m_buttons.at(Audio) =
-//         new Button("Audio: ON", m_uidata.MainMenuFont, m_font_size);
-//   }
-//   m_buttons.at(Audio)->drawable.setPosition({300, 300});
-//   m_buttons.at(Audio)->setFunc([this](void) {
-//     GAME_STATE.toggleAudio();
-//     if (GAME_STATE.isMuted())
-//       m_buttons.at(Audio)->drawable.setString("Audio: OFF");
-//     else
-//       m_buttons.at(Audio)->drawable.setString("Audio: ON");
-//   });
-
-//   m_buttons.at(Quit) = new Button("Quit", m_uidata.MainMenuFont, m_font_size);
-//   m_buttons.at(Quit)->drawable.setPosition({350, 350});
-//   m_buttons.at(Quit)->setFunc([](void) { exit(0); });
-//   Logger::log_msg("Constructed MainMenu");
-// }
-
 MainMenu::MainMenu(const InterfaceData& uidata) : Menu(uidata)
 {
   m_buttons.emplace_back("Start", m_uidata.MainMenuFont, m_font_size);
