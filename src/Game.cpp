@@ -16,7 +16,10 @@
 
 Game::Game() : 
   window(sf::VideoMode({800, 600}), "Muzhik 2066"),
-  GAME_STATE(GameState::getInstance())
+  GAME_STATE(GameState::getInstance()),
+  player_data(textures, sounds),
+  enemy_data(textures, sounds),
+  uidata(sounds)
 {
   window.setFramerateLimit(60);
   window.setVerticalSyncEnabled(true);
@@ -27,7 +30,7 @@ Game::Game() :
 void Game::MainLoop() {   
   while (true) {
     if (GAME_STATE.scene == GameState::MENU) {
-      std::unique_ptr<MainMenu> menu = std::make_unique<MainMenu>(m_uidata);
+      std::unique_ptr<MainMenu> menu = std::make_unique<MainMenu>(uidata);
       menu->displayMenu(window);
     }
     if (GAME_STATE.scene == GameState::LEVEL) {
@@ -41,7 +44,7 @@ void Game::MainLoop() {
 }
 
 void Game::pauseGame(sf::Clock& wave_clock, sf::Clock& spawn_timer) {
-  PauseMenu pm(m_uidata);
+  PauseMenu pm(uidata);
   // constantly restart timers to keep them at 0
   wave_clock.restart();
   spawn_timer.restart();
@@ -155,14 +158,14 @@ void Game::survival_loop() {
   std::vector<std::unique_ptr<Projectile>> ProjVec {};
   std::vector<std::unique_ptr<Projectile>> enemy_proj_vec;
   std::vector<std::unique_ptr<Enemy>> enemy_vec; 
-  EnemyData ptrs {
+  EnemyPtrs ptrs {
     &ProjVec,
     &enemy_proj_vec
   };
 
   // player
   std::unique_ptr player = std::make_unique<Player>(ProjVec,
-    enemy_vec, enemy_proj_vec);
+    enemy_vec, enemy_proj_vec, player_data);
     
   // timers
   float delta {};
@@ -200,8 +203,8 @@ void Game::survival_loop() {
     survival.drawLevel(window); 
 
     // player update + input handler
-    player->input_handler(delta, SndMgr);
-    player->updatePlayer(window, SndMgr);
+    player->input_handler(delta);
+    player->updatePlayer(window);
 
     // UI draw part
     player_lives.setString("Lives:" + std::to_string(player->lives));
@@ -234,7 +237,7 @@ void Game::survival_loop() {
 
     if (player->lives <= 0) {
       std::clog << "Player died\n";
-      SndMgr.playSound("player_death");
+      player_data.snd_death.play();
       survival.stop_music();
       showGameOverScreen(UI_font, lvl_score);
     }
@@ -246,7 +249,7 @@ void Game::survival_loop() {
         mp = mp_map.at(rand()%4);
         if (enemy_spawn_timer.getElapsedTime().asSeconds() > spawn_rand) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, mp, mp.spawn_pos));
+                                (ptrs, mp, mp.spawn_pos, enemy_data));
           enemy_spawn_timer.restart();
         }
         break;
@@ -255,7 +258,7 @@ void Game::survival_loop() {
         mp = mp_map.at(rand()%4);
         if (enemy_spawn_timer.getElapsedTime().asSeconds() > spawn_rand) {
           enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                                (ptrs, mp, mp.spawn_pos));
+                                (ptrs, mp, mp.spawn_pos, enemy_data));
           enemy_spawn_timer.restart();
         }
         break;
@@ -264,7 +267,7 @@ void Game::survival_loop() {
         mp = mp_map.at(rand()%4);
         if (enemy_spawn_timer.getElapsedTime().asSeconds() > spawn_rand) {
           enemy_vec.emplace_back(std::make_unique<Skull>
-                                (ptrs, mp, mp.spawn_pos));
+                                (ptrs, mp, mp.spawn_pos, enemy_data));
           enemy_spawn_timer.restart();
         }
         break;
@@ -273,7 +276,7 @@ void Game::survival_loop() {
     // ENEMY UPDATE LOOP
     for (auto& enemy : enemy_vec) {
       if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {
-        enemy->send_to_valhalla(enemy->getSprite());
+        enemy->send_to_valhalla();
         lvl_score += 10;
         // very expensive operation. Also all enemies blink
         // when one of them dies
@@ -281,12 +284,12 @@ void Game::survival_loop() {
         enemy_vec.shrink_to_fit();
         break;
       } else if (enemy->state == Enemy::FLEW_AWAY && !(enemy_vec.empty())) {
-        enemy->send_to_valhalla(enemy->getSprite());
+        enemy->send_to_valhalla();
         enemy_vec.erase(std::find(enemy_vec.begin(), enemy_vec.end(), enemy));
         enemy_vec.shrink_to_fit();
         break;
       } else {
-        enemy->updateEnemy(delta, SndMgr);
+        enemy->updateEnemy(delta);
         window.draw(enemy->getSprite());
       }
     }
@@ -342,14 +345,14 @@ void Game::lvl1Loop() {
   std::vector<std::unique_ptr<Projectile>> ProjVec {};
   std::vector<std::unique_ptr<Projectile>> enemy_proj_vec;
   std::vector<std::unique_ptr<Enemy>> enemy_vec; 
-  EnemyData ptrs {
+  EnemyPtrs ptrs {
     &ProjVec,
     &enemy_proj_vec
   };
 
   // player
   std::unique_ptr player = std::make_unique<Player>(ProjVec,
-    enemy_vec, enemy_proj_vec);
+    enemy_vec, enemy_proj_vec, player_data);
     
   // timers
   float delta {};
@@ -378,7 +381,7 @@ void Game::lvl1Loop() {
   std::array<int, 8> enemies_in_wave = {10, 10, 5, 5, 14, 14, 15, 15};
     
   // load boss before game starts, spawn him later
-  Boss wizard(ptrs);
+  Boss wizard(ptrs, textures);
   std::array<Boss, 1> boss_arr = {wizard};
 
     // ====== GAME LOOP ====== //
@@ -390,8 +393,8 @@ void Game::lvl1Loop() {
     lvl1.drawLevel(window); 
 
     // player update + input handler
-    player->input_handler(delta, SndMgr);
-    player->updatePlayer(window, SndMgr);
+    player->input_handler(delta);
+    player->updatePlayer(window);
 
     // UI draw part
     player_lives.setString("Lives:" + std::to_string(player->lives));
@@ -424,7 +427,6 @@ void Game::lvl1Loop() {
 
     if (player->lives <= 0) {
       std::clog << "Player died\n";
-      SndMgr.playSound("player_death");
       lvl1.stop_music();
       showGameOverScreen(UI_font, lvl_score);
     }
@@ -436,7 +438,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[0]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, curve, curve.spawn_pos));    
+                                (ptrs, curve, curve.spawn_pos, enemy_data));    
           --enemies_in_wave[0];
           enemy_spawn_timer.restart();
         }
@@ -448,7 +450,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[1]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 200) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, op_curve, op_curve.spawn_pos));
+                                (ptrs, op_curve, op_curve.spawn_pos, enemy_data));
           --enemies_in_wave[1];
           enemy_spawn_timer.restart();
         }
@@ -459,11 +461,11 @@ void Game::lvl1Loop() {
     if (time_wave > 13) {
       for (int i = enemies_in_wave[2]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
-          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, rl_line, rl_line.spawn_pos));
+          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, rl_line, rl_line.spawn_pos, enemy_data));
           enemy_spawn_timer.restart();
         }
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, march, sf::Vector2f ((100 * (float)i + 1), 0)));
+                              (ptrs, march, sf::Vector2f ((100 * (float)i + 1), 0), enemy_data));
         --enemies_in_wave[2];
       }
     }
@@ -472,11 +474,11 @@ void Game::lvl1Loop() {
     if (time_wave > 19) {
       for (int i = enemies_in_wave[3]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
-          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, lr_line, lr_line.spawn_pos));
+          enemy_vec.emplace_back(std::make_unique<Fairy>(ptrs, lr_line, lr_line.spawn_pos, enemy_data));
           enemy_spawn_timer.restart();
         }
         enemy_vec.emplace_back(std::make_unique<LizardKiller>
-                              (ptrs, march, sf::Vector2f ((100 * (float(i) + 2)), 0)));
+                              (ptrs, march, sf::Vector2f ((100 * (float(i) + 2)), 0), enemy_data));
         --enemies_in_wave[3];
       }
     }
@@ -486,7 +488,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[4]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 350) {
           enemy_vec.emplace_back(std::make_unique<Skull>
-                                (ptrs, curve, curve.spawn_pos));
+                                (ptrs, curve, curve.spawn_pos, enemy_data));
           --enemies_in_wave[4];
           enemy_spawn_timer.restart();
         }
@@ -498,7 +500,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[5]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 350) {
           enemy_vec.emplace_back(std::make_unique<Skull>
-                                (ptrs, op_curve, op_curve.spawn_pos));
+                                (ptrs, op_curve, op_curve.spawn_pos, enemy_data));
           --enemies_in_wave[5];
           enemy_spawn_timer.restart();
         }
@@ -510,7 +512,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[6]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, lr_line, lr_line.spawn_pos));
+                                (ptrs, lr_line, lr_line.spawn_pos, enemy_data));
           --enemies_in_wave[6];
           enemy_spawn_timer.restart();
         }
@@ -522,7 +524,7 @@ void Game::lvl1Loop() {
       for (int i = enemies_in_wave[7]; i > 0; --i) {
         if (enemy_spawn_timer.getElapsedTime().asMilliseconds() > 150) {
           enemy_vec.emplace_back(std::make_unique<Fairy>
-                                (ptrs, rl_line, rl_line.spawn_pos));
+                                (ptrs, rl_line, rl_line.spawn_pos, enemy_data));
           --enemies_in_wave[7];
           enemy_spawn_timer.restart();
         }
@@ -540,7 +542,7 @@ void Game::lvl1Loop() {
           if (boss.update_boss(delta, time_wave)) {
             lvl_score+=1000;
             lvl1.stop_music();
-            SndMgr.playSound("game_win");
+            uidata.winScreenSound.play();
             showFinalScoreScreen(lvl_score, player->lives, UI_font);
           }
         }
@@ -551,7 +553,7 @@ void Game::lvl1Loop() {
     // ENEMY UPDATE LOOP
     for (auto& enemy : enemy_vec) {
       if(enemy->state == Enemy::DEAD && !(enemy_vec.empty())) {
-        enemy->send_to_valhalla(enemy->getSprite());
+        enemy->send_to_valhalla();
         lvl_score += 10;
         // very expensive operation. Also all enemies blink
         // when one of them dies
@@ -559,12 +561,12 @@ void Game::lvl1Loop() {
         enemy_vec.shrink_to_fit();
         break;
       } else if (enemy->state == Enemy::FLEW_AWAY && !(enemy_vec.empty())) {
-        enemy->send_to_valhalla(enemy->getSprite());
+        enemy->send_to_valhalla();
         enemy_vec.erase(std::find(enemy_vec.begin(), enemy_vec.end(), enemy));
         enemy_vec.shrink_to_fit();
         break;
       } else {
-        enemy->updateEnemy(delta, SndMgr);
+        enemy->updateEnemy(delta);
         window.draw(enemy->getSprite());
       }
     }

@@ -5,8 +5,8 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Clock.hpp>
 
+#include "AssetManager.hpp"
 #include "Projectile.hpp"
-#include "Sound.hpp"
 
 /** Defines enemy movement pattern in 3-point system.
     Initializes as curve line pattern by default */
@@ -38,20 +38,18 @@ constexpr MovePattern rl_line {
 };
 
 /** Contains pointers to all needed vectors */
-struct EnemyData {
+struct EnemyPtrs {
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
 };
 
-void load_texture(sf::Texture& texture, const char* path);
-
 class Enemy {
 protected:
-  sf::Texture EnemyTexture;
-	sf::Sprite EnemySprite;
-	sf::Clock ShootTimer;
+  EnemyData& data;
+  sf::Sprite sprite;
+	sf::Clock ShootTimer; // is good
 
-  float speed {};
+  float speed {}; // why float?
 
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr; 
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
@@ -62,7 +60,7 @@ protected:
   sf::Vector2f current_direction {};
 
 public: 
-  Enemy();
+  Enemy(EnemyData& ed, const std::string& name);
   enum EnemyState {
     ALIVE,
     DEAD,
@@ -70,12 +68,12 @@ public:
   };
   int state = ALIVE;
   
-	virtual void updateEnemy(const float& delta, SoundManager& smg) = 0;
+	virtual void updateEnemy(const float& delta) = 0;
   virtual void enemyShoot() = 0;
   virtual void increase_score(unsigned int& score) = 0;
   
   void enemy_move(const float& delta);
-  void send_to_valhalla(sf::Sprite& sprite);
+  void send_to_valhalla();
   int& getHp();
   sf::Rect<float> getBounds();
   sf::Sprite& getSprite();
@@ -91,9 +89,9 @@ public:
       @param player projectile vector reference to check collision with player
       bullets, enemy projectile vector reference to shoot, struct that
       defines move pattern for enemy*/
-  Fairy(EnemyData& dt, MovePattern pattern, const sf::Vector2f& spawn_pos);
+  Fairy(EnemyPtrs& dt, MovePattern pattern, const sf::Vector2f& spawn_pos, EnemyData& ed);
   void increase_score(unsigned int& score) override;
-  void updateEnemy(const float& delta, SoundManager& smg) override;
+  void updateEnemy(const float& delta) override;
   void enemyShoot() override;
 };
 
@@ -101,10 +99,10 @@ class LizardKiller : public Enemy {
 private:
   int hp = 30;
 public:
-  LizardKiller(EnemyData& dt, MovePattern pattern, 
-               const sf::Vector2f& spawn_pos);
+  LizardKiller(EnemyPtrs& dt, MovePattern pattern, 
+               const sf::Vector2f& spawn_pos,EnemyData& ed);
   void increase_score(unsigned int& score) override;
-	void updateEnemy(const float& delta, SoundManager& smg) override;
+	void updateEnemy(const float& delta) override;
   void enemyShoot() override;
 };
 
@@ -112,14 +110,15 @@ class Skull : public Enemy {
 private: 
   int hp = 6;
 public:
-  Skull(EnemyData& dt, MovePattern pattern, const sf::Vector2f spawn_pos);
+  Skull(EnemyPtrs& dt, MovePattern pattern, const sf::Vector2f spawn_pos, EnemyData& ed);
   void increase_score(unsigned int& score) override;
-  void updateEnemy(const float& delta, SoundManager& smg) override;
+  void updateEnemy(const float& delta) override;
   void enemyShoot() override;
 };
 
 class Boss {
 private:
+  TextureStorage& m_ts;
   std::vector<std::unique_ptr<Projectile>>* plr_prj_vec_ptr;
   std::vector<std::unique_ptr<Projectile>>* enm_prj_vec_ptr;
   float speed = 250.0f;
@@ -144,7 +143,7 @@ public:
   int state {};
   int hp = 633;
   bool triggered = false;
-  Boss(EnemyData& dt);
+  Boss(EnemyPtrs& dt, TextureStorage& ts);
 
   sf::Sprite& get_sprite();
   void trigger();

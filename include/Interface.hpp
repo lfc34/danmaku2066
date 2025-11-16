@@ -5,6 +5,8 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include "AssetManager.hpp"
+#include "SFML/Audio/Sound.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -16,7 +18,8 @@ struct InterfaceData {
   sf::Font MainMenuFont;
   sf::Font PauseMenuFont;
   sf::Texture MainMenuTexture;
-  InterfaceData();
+  sf::Sound winScreenSound;
+  InterfaceData(SoundBufferStorage& sbuf);
 };
 
 class Button {

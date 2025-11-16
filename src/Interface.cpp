@@ -1,6 +1,7 @@
 /// PORTED TO SFML3
 #include "Interface.hpp"
 
+#include "AssetManager.hpp"
 #include "SFML/Window/Keyboard.hpp"
 
 #include <cstdint>
@@ -11,10 +12,11 @@
 
 //////////////////////////////////////////
 ////////// INTERFACE DATA
-InterfaceData::InterfaceData()
+InterfaceData::InterfaceData(SoundBufferStorage& sbuf)
     : MainMenuFont("../assets/gfx/HussarBold.otf"),
       MainMenuTexture("../assets/gfx/menu_bg.png"),
-      PauseMenuFont("../assets/gfx/dynapuff.ttf") {
+      PauseMenuFont("../assets/gfx/dynapuff.ttf"),
+      winScreenSound(sbuf.getData("win_screen")) {
   Logger::log_msg("Interface assets loaded successfully");
 }
 
