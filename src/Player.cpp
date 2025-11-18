@@ -2,6 +2,7 @@
 #include "Player.hpp"
 #include "GameState.hpp"
 #include "Logger.hpp"
+#include "SFML/Window/Keyboard.hpp"
 
 Player::Player(std::vector<std::unique_ptr<Projectile>> &pv,
                std::vector<std::unique_ptr<Enemy>> &enemies,
@@ -87,6 +88,9 @@ void Player::input_handler(const float &delta) {
       fire();
       PlayerShootTimer.restart();
     }
+  }
+  if (isKeyPressed(Key::PageUp)) {
+    lives++;
   }
 
   // movement vector
