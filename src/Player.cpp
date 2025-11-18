@@ -49,9 +49,6 @@ bool Player::check_collision() {
 void Player::updatePlayer(sf::RenderWindow &w) {
   w.draw(m_data.sprite);
 
-  // if (lives <= 0)
-  //   m_data.snd_death.play();
-
   if ((m_isInvuln = invuln_clock.getElapsedTime().asMilliseconds() < 1500))
     m_data.sprite.setColor(sf::Color::Red);
   else
@@ -78,7 +75,7 @@ void Player::move(float x, float y, const float &delta) {
 }
 
 void Player::fire() {
-  m_data.snd_fire.play();
+  if (!GAME_STATE.isMuted()) m_data.snd_fire.play();
   m_projVecPtr->emplace_back(std::make_unique<Bullet>(getPlayerPosition()));
 }
 

@@ -6,6 +6,7 @@
 #include <SFML/System/Clock.hpp>
 
 #include "AssetManager.hpp"
+#include "GameState.hpp"
 #include "Projectile.hpp"
 
 /** Defines enemy movement pattern in 3-point system.
@@ -45,6 +46,7 @@ struct EnemyPtrs {
 
 class Enemy {
 protected:
+  GameState& GAME_STATE;
   EnemyData& data;
   sf::Sprite sprite;
 	sf::Clock ShootTimer; // is good

@@ -1,13 +1,14 @@
 /// PORTED TO SFML3
 #include "Enemy.hpp"
 #include "AssetManager.hpp"
+#include "GameState.hpp"
 #include "SFML/Graphics/Sprite.hpp"
 #include "SFML/System/Time.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
 // ENEMY
 Enemy::Enemy(EnemyData &ed, const std::string &name)
-    : data(ed), sprite(data.getSprite(name)) {}
+    : data(ed), sprite(data.getSprite(name)), GAME_STATE(GameState::getInstance()) {}
 
 void Enemy::enemy_move(const float &delta) {
   if (sprite.getPosition().y >= path.mid_point.y)
@@ -53,7 +54,7 @@ void Fairy::updateEnemy(const float &delta) {
   }
   if (this->hp <= 0) {
     // smg.playSound("fairy_death");
-    data.snd_fairy_death.play();
+    if (!GAME_STATE.isMuted()) data.snd_fairy_death.play();
     state = DEAD;
   }
   if (getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
@@ -104,7 +105,7 @@ void LizardKiller::updateEnemy(const float &delta) {
   }
   if (this->hp <= 0) {
     // smg.playSound("lizard_death");
-    data.snd_lizard_death.play();
+    if (!GAME_STATE.isMuted()) data.snd_lizard_death.play();
     state = DEAD;
   }
   if (getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)
@@ -145,7 +146,7 @@ void Skull::updateEnemy(const float &delta) {
   }
   if (this->hp <= 0) {
     // smg.playSound("lizard_death");
-    data.snd_lizard_death.play();
+    if (!GAME_STATE.isMuted()) data.snd_lizard_death.play();
     state = DEAD;
   }
   if (getSprite().getPosition().y > 650 || getSprite().getPosition().y < -50)

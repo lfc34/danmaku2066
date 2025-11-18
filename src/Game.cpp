@@ -236,8 +236,8 @@ void Game::survival_loop() {
     }
 
     if (player->lives <= 0) {
-      std::clog << "Player died\n";
-      player_data.snd_death.play();
+      Logger::log_clr("Player died");
+      if (!GAME_STATE.isMuted()) player_data.snd_death.play();
       survival.stop_music();
       showGameOverScreen(UI_font, lvl_score);
     }
@@ -426,7 +426,8 @@ void Game::lvl1Loop() {
     }
 
     if (player->lives <= 0) {
-      std::clog << "Player died\n";
+      Logger::log_clr("Player died");
+      if (!GAME_STATE.isMuted()) player_data.snd_death.play();
       lvl1.stop_music();
       showGameOverScreen(UI_font, lvl_score);
     }
